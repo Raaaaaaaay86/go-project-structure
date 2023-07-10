@@ -1,0 +1,95 @@
+definitions:
+  login.Command:
+    properties:
+      password:
+        example: password
+        type: string
+      username:
+        example: username01
+        type: string
+    type: object
+  login.Response:
+    properties:
+      token:
+        type: string
+    type: object
+  register.Command:
+    properties:
+      email:
+        example: example@gmail.com
+        type: string
+      password:
+        example: password
+        type: string
+      username:
+        example: username01
+        type: string
+    type: object
+  register.Response:
+    properties:
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
+host: localhost:8080/video/api
+info:
+  contact:
+    email: raylincontact@icloud.com
+    name: Ray Lin
+  description: This is a demo of Go project structure and others tech stack usage.
+  title: Video Service
+  version: "1.0"
+paths:
+  /v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request format
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/login.Command'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/login.Response'
+      security:
+      - BearerAuth: []
+      summary: Login and get token.
+      tags:
+      - auth
+  /v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request format
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/register.Command'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/register.Response'
+      security:
+      - BearerAuth: []
+      summary: Register new user.
+      tags:
+      - auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

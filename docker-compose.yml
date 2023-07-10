@@ -1,0 +1,32 @@
+version: "3.7"
+
+services:
+  postgres:
+    container_name: video-postgres-db
+    image: postgres:15.2-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: video
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 123456
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - video-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  mongo:
+    container_name: video-mongodb
+    image: mongo
+    restart: always
+    volumes:
+      - video-mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 123456
+    ports:
+      - "27017:27017"
+
+volumes:
+  video-postgres-data:
+  video-mongo-data:

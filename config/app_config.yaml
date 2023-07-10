@@ -1,0 +1,19 @@
+http:
+  port: 8080
+
+postgres:
+  host: localhost
+  port: 5432
+  user: root
+  password: 123456
+  schema: video
+
+mongodb:
+  host: localhost
+  port: 27017
+  user: root
+  password: 123456
+
+bucketPath:
+  raw: /Users/linjiafu/project/go-video-demo/bucket
+  converted: /Users/linjiafu/project/go-video-demo/bucket/converted

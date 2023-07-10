@@ -1,0 +1,19 @@
+# Options for analysis running.
+run:
+  concurrency: 10
+  timeout: 5m
+  skip-dirs-use-default: false
+  modules-download-mode: readonly
+  allow-parallel-runners: true
+  go: '1.20'
+
+linters:
+  enable:
+    - bodyclose
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - errname
