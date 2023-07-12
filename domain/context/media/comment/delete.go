@@ -37,9 +37,8 @@ func (d DeleteCommentUseCase) Execute(cmd DeleteCommentCommand) (*DeleteCommentR
 	}
 
 	isNotAuthor := comment.AuthorId != cmd.ExecutorId
-	// There would be a better way to do RBAC checking
-	isNotAdmin := cmd.RoleId != role.Admin || cmd.RoleId != role.SuperAdmin
-	if isNotAuthor && isNotAdmin {
+	isAdmin := cmd.RoleId == role.Admin || cmd.RoleId == role.SuperAdmin
+	if isNotAuthor && !isAdmin {
 		return nil, exception.ErrUnauthorized
 	}
 

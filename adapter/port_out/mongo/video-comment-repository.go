@@ -43,3 +43,27 @@ func (v VideoCommentRepository) FindByVideoId(videoId uint) ([]*entity.VideoComm
 
 	return comments, nil
 }
+
+func (v VideoCommentRepository) FindById(id primitive.ObjectID) (*entity.VideoComment, error) {
+	result := v.Collection.FindOne(context.Background(), bson.M{"_id": id})
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	var comment *entity.VideoComment
+	err := result.Decode(&comment)
+	if err != nil {
+		return nil, err
+	}
+
+	return comment, nil
+}
+
+func (v VideoCommentRepository) DeleteById(id primitive.ObjectID) error {
+	_, err := v.Collection.DeleteOne(context.Background(), bson.M{"_id": id})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
