@@ -2,11 +2,20 @@ package comment
 
 import (
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
+	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/domain/repository"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
 )
 
 type FindByVideoQuery struct {
 	VideoId uint `form:"videoId"`
+}
+
+func (f FindByVideoQuery) Validate() error {
+	if f.VideoId == 0 {
+		return exception.ErrEmptyInput
+	}
+	return nil
 }
 
 type FindByVideoResponse struct {
@@ -26,6 +35,11 @@ func NewFindByVideoUseCase(videoCommentRepository repository.VideoCommentReposit
 }
 
 func (f FindByVideoCQRS) Execute(query FindByVideoQuery) (*FindByVideoResponse, error) {
+	err := validate.Do(query)
+	if err != nil {
+		return nil, err
+	}
+
 	comments, err := f.VideoCommentRepository.FindByVideoId(query.VideoId)
 	if err != nil {
 		return nil, err

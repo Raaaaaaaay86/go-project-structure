@@ -3,6 +3,7 @@ package comment_test
 import (
 	"github.com/raaaaaaaay86/go-project-structure/domain/context/media/comment"
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
+	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/mocks"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -38,13 +39,22 @@ func TestFindByVideoCQRS_Execute(t *testing.T) {
 			},
 			ExpectedError: nil,
 		},
+		{
+			Description:   "Request by empty VideoId",
+			VideoId:       0,
+			ExpectedError: exception.ErrEmptyInput,
+		},
 	}
 
 	for i, tc := range testCases {
 		t.Logf("Test case [%d]", i)
 
 		videoCommentRepository := mocks.NewVideoCommentRepository(t)
-		videoCommentRepository.On("FindByVideoId", tc.VideoId).Return(tc.ExpectedComments, nil)
+		switch tc.ExpectedError {
+		case nil:
+			videoCommentRepository.On("FindByVideoId", tc.VideoId).Return(tc.ExpectedComments, nil)
+		case exception.ErrEmptyInput:
+		}
 
 		useCase := comment.NewFindByVideoUseCase(videoCommentRepository)
 		query := comment.FindByVideoQuery{VideoId: tc.VideoId}
