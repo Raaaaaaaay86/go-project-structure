@@ -58,7 +58,7 @@ func TestRegisterUseCase_Execute(t *testing.T) {
 			cmd.Username,
 			cmd.DecryptedPassword.Encrypt(),
 			cmd.Email,
-			*(entity.NewRole(role.User, role.User.Code())),
+			*(entity.NewRole(role.User)),
 		)
 
 		if tc.ExceptedErr == nil {

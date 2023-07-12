@@ -59,7 +59,7 @@ func TestLoginCQRS_Execute(t *testing.T) {
 
 		userRepository := mocks.NewUserRepository(t)
 		userRepository.On("WithPreload").Return(userRepository).Maybe()
-		expectedUser := entity.NewUser(cmd.Username, cmd.DecryptedPassword.Encrypt(), mock.Anything, *(entity.NewRole(testcase.UserRole, testcase.UserRole.Code())))
+		expectedUser := entity.NewUser(cmd.Username, cmd.DecryptedPassword.Encrypt(), mock.Anything, *(entity.NewRole(testcase.UserRole)))
 		switch testcase.ExpectedErr {
 		case nil, exception.ErrWrongPassword:
 			userRepository.On("FindByUsername", cmd.Username).Return(expectedUser, nil).Once()

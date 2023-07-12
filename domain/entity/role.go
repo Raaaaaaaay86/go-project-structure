@@ -14,9 +14,9 @@ type Role struct {
 	DeletedAt sql.NullTime `json:"deleted_at,omitempty"`
 }
 
-func NewRole(role role.RoleId, name string) *Role {
+func NewRole(role role.RoleId) *Role {
 	return &Role{
 		Id:   role,
-		Name: name,
+		Name: role.Code(),
 	}
 }

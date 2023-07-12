@@ -2,7 +2,9 @@ package comment
 
 import (
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
+	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/domain/repository"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
 	"time"
 )
 
@@ -10,6 +12,13 @@ type CreateCommentCommand struct {
 	Comment  string `json:"comment"`
 	VideoId  uint   `json:"videoId,string"`
 	AuthorId uint   `json:"-"`
+}
+
+func (c CreateCommentCommand) Validate() error {
+	if c.Comment == "" {
+		return exception.ErrEmptyInput
+	}
+	return nil
 }
 
 type CreateCommentResponse struct {
@@ -26,11 +35,20 @@ type CreateCommentUseCase struct {
 	VideoPostRepository repository.VideoPostRepository
 }
 
-func NewCreateCommentUseCase(videoCommentRepo repository.VideoCommentRepository) *CreateCommentUseCase {
-	return &CreateCommentUseCase{VideoCommentRepo: videoCommentRepo}
+func NewCreateCommentUseCase(videoCommentRepo repository.VideoCommentRepository, userRepository repository.UserRepository, postRepository repository.VideoPostRepository) *CreateCommentUseCase {
+	return &CreateCommentUseCase{
+		VideoCommentRepo:    videoCommentRepo,
+		UserRepository:      userRepository,
+		VideoPostRepository: postRepository,
+	}
 }
 
 func (c CreateCommentUseCase) Execute(cmd CreateCommentCommand) (*CreateCommentResponse, error) {
+	err := validate.Do(cmd)
+	if err != nil {
+		return nil, err
+	}
+
 	author, err := c.UserRepository.FindById(cmd.AuthorId)
 	if err != nil {
 		return nil, err

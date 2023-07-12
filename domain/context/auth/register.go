@@ -37,7 +37,7 @@ func (u RegisterUserUseCase) Execute(cmd RegisterUserCommand) (*RegisterUserResp
 		return nil, err
 	}
 
-	user := entity.NewUser(cmd.Username, cmd.DecryptedPassword.Encrypt(), cmd.Email, *(entity.NewRole(role.User, role.User.Code())))
+	user := entity.NewUser(cmd.Username, cmd.DecryptedPassword.Encrypt(), cmd.Email, *(entity.NewRole(role.User)))
 
 	err = u.userRepository.Create(user)
 	if err != nil {

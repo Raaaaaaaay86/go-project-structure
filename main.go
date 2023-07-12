@@ -49,7 +49,7 @@ func main() {
 	loginUseCase := auth.NewLoginUseCase(userRepository)
 	uploadVideoUseCase := createVideo.NewUploadVideoUseCase(fileUploader, ffmpeg)
 	createVideoUseCase := createVideo.NewCreateVideoUseCase(videoPostRepository, userRepository)
-	createCommentUseCase := comment.NewCreateCommentUseCase(videoCommentRepository)
+	createCommentUseCase := comment.NewCreateCommentUseCase(videoCommentRepository, userRepository, videoPostRepository)
 	findCommentByVideoUseCase := comment.NewFindByVideoUseCase(videoCommentRepository)
 
 	// HTTP Server
