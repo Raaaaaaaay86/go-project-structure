@@ -59,7 +59,8 @@ func (c CreateCommentUseCase) Execute(cmd CreateCommentCommand) (*CreateCommentR
 		return nil, err
 	}
 
-	comment := entity.NewVideoComment(*video, *author, cmd.Comment, time.Now(), time.Now())
+	now := time.Now()
+	comment := entity.NewVideoComment(*video, *author, cmd.Comment, now, now)
 
 	err = c.VideoCommentRepo.Create(comment)
 	if err != nil {
