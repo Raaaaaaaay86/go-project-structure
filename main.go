@@ -14,6 +14,7 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/pkg/configs"
 	convert "github.com/raaaaaaaay86/go-project-structure/pkg/convert/video"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/gorm"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/logger"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/mongo"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 )
@@ -24,6 +25,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	zapLogger, err := logger.NewZapLogger()
+	if err != nil {
+		panic(err)
+	}
+	defer zapLogger.Sync()
 
 	// Postgres Repositories
 	db, err := gorm.NewPostgresConnection(config.Postgres)
