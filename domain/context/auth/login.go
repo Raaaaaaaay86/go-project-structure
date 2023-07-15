@@ -1,11 +1,13 @@
 package auth
 
 import (
+	"context"
 	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/domain/repository"
 	"github.com/raaaaaaaay86/go-project-structure/domain/vo"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/jwt"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
+	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 type LoginUserCommand struct {
@@ -25,20 +27,25 @@ type LoginUserResponse struct {
 }
 
 type ILoginUserResponse interface {
-	Execute(cmd LoginUserCommand) (*LoginUserResponse, error)
+	Execute(ctx context.Context, cmd LoginUserCommand) (*LoginUserResponse, error)
 }
 
 type LoginUserUseCase struct {
 	UserRepository repository.UserRepository
+	TracerProvider *trace.TracerProvider
 }
 
-func NewLoginUseCase(userRepository repository.UserRepository) *LoginUserUseCase {
+func NewLoginUseCase(tracer *trace.TracerProvider, userRepository repository.UserRepository) *LoginUserUseCase {
 	return &LoginUserUseCase{
 		UserRepository: userRepository,
+		TracerProvider: tracer,
 	}
 }
 
-func (c LoginUserUseCase) Execute(cmd LoginUserCommand) (*LoginUserResponse, error) {
+func (c LoginUserUseCase) Execute(ctx context.Context, cmd LoginUserCommand) (*LoginUserResponse, error) {
+	_, span := c.TracerProvider.Tracer(pkg).Start(ctx, "LoginUserUseCase.Execute")
+	defer span.End()
+
 	err := validate.Do(cmd)
 	if err != nil {
 		return nil, err
@@ -58,5 +65,9 @@ func (c LoginUserUseCase) Execute(cmd LoginUserCommand) (*LoginUserResponse, err
 		return nil, exception.ErrTokenGenerationFailed
 	}
 
-	return &LoginUserResponse{Token: tokenString}, nil
+	res := &LoginUserResponse{
+		Token: tokenString,
+	}
+
+	return res, nil
 }

@@ -15,6 +15,7 @@ import (
 	convert "github.com/raaaaaaaay86/go-project-structure/pkg/convert/video"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/gorm"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/mongo"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 )
 
 func main() {
@@ -45,15 +46,19 @@ func main() {
 	ffmpeg := convert.NewFfmpeg(config.BucketPath.Converted)
 
 	// Use Case
+	appTracer := tracing.NewJaegerTracerProvider("application")
+
 	registerUseCase := auth.NewRegisterUserUseCase(userRepository)
-	loginUseCase := auth.NewLoginUseCase(userRepository)
+	loginUseCase := auth.NewLoginUseCase(appTracer, userRepository)
 	uploadVideoUseCase := createVideo.NewUploadVideoUseCase(fileUploader, ffmpeg)
 	createVideoUseCase := createVideo.NewCreateVideoUseCase(videoPostRepository, userRepository)
 	createCommentUseCase := comment.NewCreateCommentUseCase(videoCommentRepository, userRepository, videoPostRepository)
 	findCommentByVideoUseCase := comment.NewFindByVideoUseCase(videoCommentRepository)
 
 	// HTTP Server
-	authController := controller.NewAuthenticationController(registerUseCase, loginUseCase)
+	ginTracer := tracing.NewJaegerTracerProvider("http")
+
+	authController := controller.NewAuthenticationController(registerUseCase, loginUseCase, ginTracer)
 	videoController := controller.NewVideoController(uploadVideoUseCase, createVideoUseCase)
 	commentController := controller.NewCommentController(createCommentUseCase, findCommentByVideoUseCase)
 
