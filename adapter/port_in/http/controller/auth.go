@@ -6,7 +6,6 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/pkg/res"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"net/http"
-	"time"
 )
 
 type IAuthenticationController interface {
@@ -81,8 +80,6 @@ func (a AuthenticationController) Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, res.Fail(err.Error(), nil))
 		return
 	}
-
-	time.Sleep(3 * time.Second)
 
 	ctx.JSON(http.StatusOK, res.Success(response))
 }
