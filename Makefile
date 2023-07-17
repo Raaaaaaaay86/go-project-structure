@@ -24,3 +24,6 @@ migrate_up:
 	migrate -path migration/postgres -database "postgres://root:123456@localhost:5432/$(DB_SCHEMA)?sslmode=disable" -verbose up
 migrate_down:
 	migrate -path migration/postgres -database "postgres://root:123456@localhost:5432/$(DB_SCHEMA)?sslmode=disable" -verbose down
+
+init_mongo:
+	docker exec -it video-mongodb mongosh -u root -p 123456 --quiet --eval "rs.initiate();"
