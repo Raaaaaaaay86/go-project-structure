@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/raaaaaaaay86/go-project-structure/domain/context/auth"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/res"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"net/http"
 )
@@ -65,7 +66,7 @@ func (a AuthenticationController) Register(ctx *gin.Context) {
 //		@Router						/v1/auth/login [post]
 //	 @Security BearerAuth
 func (a AuthenticationController) Login(ctx *gin.Context) {
-	newCtx, span := a.TracerProvider.Tracer(pkg).Start(ctx, http.MethodGet)
+	newCtx, span := tracing.HttpSpanFactory(a.TracerProvider, ctx, pkg)
 	defer span.End()
 
 	var command auth.LoginUserCommand
