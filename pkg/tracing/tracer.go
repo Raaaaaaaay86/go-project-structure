@@ -1,11 +1,15 @@
 package tracing
 
 import (
+	"context"
+	"fmt"
+	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
 	"go.opentelemetry.io/otel/sdk/resource"
-	"go.opentelemetry.io/otel/sdk/trace"
+	traceSdk "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
+	"go.opentelemetry.io/otel/trace"
 	"os"
 )
 
@@ -29,7 +33,7 @@ func newJaegerExporter() (*jaeger.Exporter, error) {
 	return jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint("http://localhost:14268/api/traces")))
 }
 
-func NewStdOutTracerProvider(serviceName string) *trace.TracerProvider {
+func NewStdOutTracerProvider(serviceName string) *traceSdk.TracerProvider {
 	traceResource, err := newTraceResource(serviceName)
 	if err != nil {
 		panic(err)
@@ -38,18 +42,18 @@ func NewStdOutTracerProvider(serviceName string) *trace.TracerProvider {
 	if err != nil {
 		panic(err)
 	}
-	return trace.NewTracerProvider(trace.WithResource(traceResource), trace.WithBatcher(traceExporter))
+	return traceSdk.NewTracerProvider(traceSdk.WithResource(traceResource), traceSdk.WithBatcher(traceExporter))
 }
 
-func NewEmptyTracerProvider(serviceName string) *trace.TracerProvider {
+func NewEmptyTracerProvider(serviceName string) *traceSdk.TracerProvider {
 	traceResource, err := newTraceResource(serviceName)
 	if err != nil {
 		panic(err)
 	}
-	return trace.NewTracerProvider(trace.WithResource(traceResource))
+	return traceSdk.NewTracerProvider(traceSdk.WithResource(traceResource))
 }
 
-func NewJaegerTracerProvider(serviceName string) *trace.TracerProvider {
+func NewJaegerTracerProvider(serviceName string) *traceSdk.TracerProvider {
 	traceResource, err := newTraceResource(serviceName)
 	if err != nil {
 		panic(err)
@@ -58,5 +62,9 @@ func NewJaegerTracerProvider(serviceName string) *trace.TracerProvider {
 	if err != nil {
 		panic(err)
 	}
-	return trace.NewTracerProvider(trace.WithResource(traceResource), trace.WithBatcher(traceExporter))
+	return traceSdk.NewTracerProvider(traceSdk.WithResource(traceResource), traceSdk.WithBatcher(traceExporter))
+}
+
+func HttpSpanFactory(tracerProvider *traceSdk.TracerProvider, ctx *gin.Context, fullPackage string) (context.Context, trace.Span) {
+	return tracerProvider.Tracer(fullPackage).Start(ctx, fmt.Sprintf("%s %s", ctx.Request.Method, ctx.Request.URL.Path))
 }
