@@ -9,15 +9,20 @@ import (
 )
 
 type VideoCommentRepository struct {
-	Collection *mongo.Collection
+	Client *mongo.Client
 }
 
-func NewVideoCommentRepository(collection *mongo.Collection) *VideoCommentRepository {
-	return &VideoCommentRepository{Collection: collection}
+func NewVideoCommentRepository(client *mongo.Client) *VideoCommentRepository {
+	return &VideoCommentRepository{
+		Client: client,
+	}
+}
+func (v VideoCommentRepository) comments() *mongo.Collection {
+	return v.Client.Database("video").Collection("comments")
 }
 
 func (v VideoCommentRepository) Create(comment *entity.VideoComment) error {
-	result, err := v.Collection.InsertOne(context.TODO(), comment)
+	result, err := v.comments().InsertOne(context.TODO(), comment)
 	if err != nil {
 		return err
 	}
@@ -26,7 +31,7 @@ func (v VideoCommentRepository) Create(comment *entity.VideoComment) error {
 }
 
 func (v VideoCommentRepository) FindByVideoId(videoId uint) ([]*entity.VideoComment, error) {
-	cursor, err := v.Collection.Find(context.TODO(), bson.M{"video_id": videoId})
+	cursor, err := v.comments().Find(context.TODO(), bson.M{"video_id": videoId})
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +50,7 @@ func (v VideoCommentRepository) FindByVideoId(videoId uint) ([]*entity.VideoComm
 }
 
 func (v VideoCommentRepository) FindById(id primitive.ObjectID) (*entity.VideoComment, error) {
-	result := v.Collection.FindOne(context.Background(), bson.M{"_id": id})
+	result := v.comments().FindOne(context.Background(), bson.M{"_id": id})
 	if result.Err() != nil {
 		return nil, result.Err()
 	}
@@ -60,7 +65,25 @@ func (v VideoCommentRepository) FindById(id primitive.ObjectID) (*entity.VideoCo
 }
 
 func (v VideoCommentRepository) DeleteById(id primitive.ObjectID) error {
-	_, err := v.Collection.DeleteOne(context.Background(), bson.M{"_id": id})
+	session, err := v.Client.StartSession()
+	if err != nil {
+		return err
+	}
+	defer session.EndSession(context.TODO())
+
+	_, err = session.WithTransaction(context.TODO(), func(sessionContext mongo.SessionContext) (interface{}, error) {
+		findResult := v.comments().FindOne(sessionContext, bson.M{"_id": id})
+		if findResult.Err() != nil {
+			return nil, findResult.Err()
+		}
+
+		deleteResult, err := v.comments().DeleteOne(sessionContext, bson.M{"_id": id})
+		if err != nil {
+			return nil, err
+		}
+
+		return deleteResult, nil
+	})
 	if err != nil {
 		return err
 	}

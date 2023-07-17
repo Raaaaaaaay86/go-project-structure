@@ -45,8 +45,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	commentsCollection := client.Database("video").Collection("comments")
-	videoCommentRepository := mongodb.NewVideoCommentRepository(commentsCollection)
+	videoCommentRepository := mongodb.NewVideoCommentRepository(client)
 
 	// Helper Package
 	fileUploader := bucket.NewLocalUploader(config.BucketPath.Raw)
