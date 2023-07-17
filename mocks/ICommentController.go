@@ -22,6 +22,11 @@ func (_m *ICommentController) Find(ctx *gin.Context) {
 	_m.Called(ctx)
 }
 
+// ForceDelete provides a mock function with given fields: ctx
+func (_m *ICommentController) ForceDelete(ctx *gin.Context) {
+	_m.Called(ctx)
+}
+
 // UserDelete provides a mock function with given fields: ctx
 func (_m *ICommentController) UserDelete(ctx *gin.Context) {
 	_m.Called(ctx)
