@@ -52,6 +52,7 @@ func (v VideoController) Upload(ctx *gin.Context) {
 	}
 	response, err := v.UploadVideoUseCase.Execute(cmd)
 	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, res.Fail(err.Error(), nil))
 		return
 	}
 
