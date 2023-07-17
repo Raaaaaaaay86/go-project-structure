@@ -2,7 +2,6 @@ package comment_test
 
 import (
 	"github.com/raaaaaaaay86/go-project-structure/domain/context/media/comment"
-	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
 	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/domain/vo/enum/role"
 	"github.com/raaaaaaaay86/go-project-structure/mocks"
@@ -17,7 +16,7 @@ func TestDeleteCommentUseCase_Execute(t *testing.T) {
 		CommentId       primitive.ObjectID
 		CommentAuthorId uint
 		ExecutorId      uint
-		RoleId          role.RoleId
+		RoleIds         []role.RoleId
 		ExpectedError   error
 		Description     string
 	}
@@ -28,7 +27,7 @@ func TestDeleteCommentUseCase_Execute(t *testing.T) {
 			CommentId:       primitive.NewObjectID(),
 			CommentAuthorId: 1,
 			ExecutorId:      1,
-			RoleId:          role.User,
+			RoleIds:         []role.RoleId{role.User},
 			ExpectedError:   nil,
 		},
 		{
@@ -36,31 +35,15 @@ func TestDeleteCommentUseCase_Execute(t *testing.T) {
 			CommentId:       primitive.NewObjectID(),
 			CommentAuthorId: 2,
 			ExecutorId:      1,
-			RoleId:          role.User,
+			RoleIds:         []role.RoleId{role.User},
 			ExpectedError:   exception.ErrUnauthorized,
-		},
-		{
-			Description:     "Comment can deleted by ADMIN role",
-			CommentId:       primitive.NewObjectID(),
-			CommentAuthorId: 2,
-			ExecutorId:      1,
-			RoleId:          role.Admin,
-			ExpectedError:   nil,
-		},
-		{
-			Description:     "Comment can deleted by SUPER_ADMIN role",
-			CommentId:       primitive.NewObjectID(),
-			CommentAuthorId: 2,
-			ExecutorId:      1,
-			RoleId:          role.SuperAdmin,
-			ExpectedError:   nil,
 		},
 		{
 			Description:     "Delete a non-exists comment",
 			CommentId:       [12]byte{9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
 			CommentAuthorId: 0,
 			ExecutorId:      1,
-			RoleId:          role.Admin,
+			RoleIds:         []role.RoleId{role.Admin},
 			ExpectedError:   mongo.ErrNoDocuments,
 		},
 	}
@@ -72,22 +55,18 @@ func TestDeleteCommentUseCase_Execute(t *testing.T) {
 		switch tc.ExpectedError {
 		case nil:
 			videoCommentRepository.
-				On("FindById", tc.CommentId).
-				Return(&entity.VideoComment{Id: tc.CommentId, AuthorId: tc.CommentAuthorId}, nil).
-				Once()
-			videoCommentRepository.
-				On("DeleteById", tc.CommentId).
-				Return(nil).
+				On("DeleteById", tc.CommentId, tc.ExecutorId).
+				Return(0, nil).
 				Once()
 		case mongo.ErrNoDocuments:
 			videoCommentRepository.
-				On("FindById", tc.CommentId).
-				Return(nil, mongo.ErrNoDocuments).
+				On("DeleteById", tc.CommentId, tc.ExecutorId).
+				Return(0, mongo.ErrNoDocuments).
 				Once()
 		case exception.ErrUnauthorized:
 			videoCommentRepository.
-				On("FindById", tc.CommentId).
-				Return(&entity.VideoComment{Id: tc.CommentId, AuthorId: tc.CommentAuthorId}, nil).
+				On("DeleteById", tc.CommentId, tc.ExecutorId).
+				Return(0, exception.ErrUnauthorized).
 				Once()
 		}
 
@@ -95,7 +74,7 @@ func TestDeleteCommentUseCase_Execute(t *testing.T) {
 		cmd := comment.DeleteCommentCommand{
 			CommentId:  tc.CommentId,
 			ExecutorId: tc.ExecutorId,
-			RoleId:     tc.RoleId,
+			RoleIds:    tc.RoleIds,
 		}
 		_, err := useCase.Execute(cmd)
 		if err != nil {

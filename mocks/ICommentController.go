@@ -22,6 +22,11 @@ func (_m *ICommentController) Find(ctx *gin.Context) {
 	_m.Called(ctx)
 }
 
+// UserDelete provides a mock function with given fields: ctx
+func (_m *ICommentController) UserDelete(ctx *gin.Context) {
+	_m.Called(ctx)
+}
+
 // NewICommentController creates a new instance of ICommentController. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewICommentController(t interface {

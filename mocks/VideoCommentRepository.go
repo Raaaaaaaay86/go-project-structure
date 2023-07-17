@@ -28,18 +28,28 @@ func (_m *VideoCommentRepository) Create(comment *entity.VideoComment) error {
 	return r0
 }
 
-// DeleteById provides a mock function with given fields: id
-func (_m *VideoCommentRepository) DeleteById(id primitive.ObjectID) error {
-	ret := _m.Called(id)
+// DeleteById provides a mock function with given fields: id, deleterId
+func (_m *VideoCommentRepository) DeleteById(id primitive.ObjectID, deleterId uint) (int, error) {
+	ret := _m.Called(id, deleterId)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(primitive.ObjectID) error); ok {
-		r0 = rf(id)
+	var r0 int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(primitive.ObjectID, uint) (int, error)); ok {
+		return rf(id, deleterId)
+	}
+	if rf, ok := ret.Get(0).(func(primitive.ObjectID, uint) int); ok {
+		r0 = rf(id, deleterId)
 	} else {
-		r0 = ret.Error(0)
+		r0 = ret.Get(0).(int)
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(primitive.ObjectID, uint) error); ok {
+		r1 = rf(id, deleterId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // FindById provides a mock function with given fields: id
@@ -87,6 +97,30 @@ func (_m *VideoCommentRepository) FindByVideoId(videoId uint) ([]*entity.VideoCo
 
 	if rf, ok := ret.Get(1).(func(uint) error); ok {
 		r1 = rf(videoId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ForceDeleteById provides a mock function with given fields: id
+func (_m *VideoCommentRepository) ForceDeleteById(id primitive.ObjectID) (int, error) {
+	ret := _m.Called(id)
+
+	var r0 int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(primitive.ObjectID) (int, error)); ok {
+		return rf(id)
+	}
+	if rf, ok := ret.Get(0).(func(primitive.ObjectID) int); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+
+	if rf, ok := ret.Get(1).(func(primitive.ObjectID) error); ok {
+		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)
 	}
