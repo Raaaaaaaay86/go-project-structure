@@ -10,4 +10,5 @@ type VideoCommentRepository interface {
 	FindByVideoId(videoId uint) ([]*entity.VideoComment, error)
 	FindById(id primitive.ObjectID) (*entity.VideoComment, error)
 	DeleteById(id primitive.ObjectID, deleterId uint) (int, error)
+	ForceDeleteById(id primitive.ObjectID) (int, error)
 }

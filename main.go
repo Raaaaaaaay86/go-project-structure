@@ -61,13 +61,14 @@ func main() {
 	createCommentUseCase := comment.NewCreateCommentUseCase(videoCommentRepository, userRepository, videoPostRepository)
 	findCommentByVideoUseCase := comment.NewFindByVideoUseCase(videoCommentRepository)
 	deleteCommentUseCase := comment.NewDeleteCommentUseCase(videoCommentRepository)
+	forceDeleteCommentUseCase := comment.NewForceDeleteCommentUseCase(videoCommentRepository)
 
 	// HTTP Server
 	ginTracer := tracing.NewJaegerTracerProvider("http")
 
 	authController := controller.NewAuthenticationController(registerUseCase, loginUseCase, ginTracer)
 	videoController := controller.NewVideoController(uploadVideoUseCase, createVideoUseCase)
-	commentController := controller.NewCommentController(createCommentUseCase, findCommentByVideoUseCase, deleteCommentUseCase)
+	commentController := controller.NewCommentController(createCommentUseCase, findCommentByVideoUseCase, deleteCommentUseCase, forceDeleteCommentUseCase)
 
 	httpPort := fmt.Sprintf(":%d", config.Http.Port)
 	err = http.

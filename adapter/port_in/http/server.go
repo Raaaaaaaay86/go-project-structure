@@ -63,5 +63,9 @@ func setCommentRouter(parent *gin.RouterGroup, comment controller.ICommentContro
 		group.POST("/create", middleware.Token, comment.Create)
 		group.GET("/find", comment.Find)
 		group.DELETE("/delete", middleware.Token, comment.UserDelete)
+		{
+			adminGroup := group.Group("/admin", middleware.Token)
+			adminGroup.DELETE("/delete", comment.ForceDelete)
+		}
 	}
 }
