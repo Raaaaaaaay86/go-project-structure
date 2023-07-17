@@ -3,7 +3,10 @@
 package mocks
 
 import (
+	context "context"
+
 	auth "github.com/raaaaaaaay86/go-project-structure/domain/context/auth"
+
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -12,25 +15,25 @@ type ILoginUserResponse struct {
 	mock.Mock
 }
 
-// Execute provides a mock function with given fields: cmd
-func (_m *ILoginUserResponse) Execute(cmd auth.LoginUserCommand) (*auth.LoginUserResponse, error) {
-	ret := _m.Called(cmd)
+// Execute provides a mock function with given fields: ctx, cmd
+func (_m *ILoginUserResponse) Execute(ctx context.Context, cmd auth.LoginUserCommand) (*auth.LoginUserResponse, error) {
+	ret := _m.Called(ctx, cmd)
 
 	var r0 *auth.LoginUserResponse
 	var r1 error
-	if rf, ok := ret.Get(0).(func(auth.LoginUserCommand) (*auth.LoginUserResponse, error)); ok {
-		return rf(cmd)
+	if rf, ok := ret.Get(0).(func(context.Context, auth.LoginUserCommand) (*auth.LoginUserResponse, error)); ok {
+		return rf(ctx, cmd)
 	}
-	if rf, ok := ret.Get(0).(func(auth.LoginUserCommand) *auth.LoginUserResponse); ok {
-		r0 = rf(cmd)
+	if rf, ok := ret.Get(0).(func(context.Context, auth.LoginUserCommand) *auth.LoginUserResponse); ok {
+		r0 = rf(ctx, cmd)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*auth.LoginUserResponse)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(auth.LoginUserCommand) error); ok {
-		r1 = rf(cmd)
+	if rf, ok := ret.Get(1).(func(context.Context, auth.LoginUserCommand) error); ok {
+		r1 = rf(ctx, cmd)
 	} else {
 		r1 = ret.Error(1)
 	}
