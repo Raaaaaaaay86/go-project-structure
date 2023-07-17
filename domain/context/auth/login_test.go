@@ -1,6 +1,7 @@
 package auth_test
 
 import (
+	"context"
 	"github.com/raaaaaaaay86/go-project-structure/domain/context/auth"
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
 	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
@@ -8,6 +9,7 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/domain/vo/enum/role"
 	"github.com/raaaaaaaay86/go-project-structure/mocks"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/jwt"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
@@ -68,7 +70,8 @@ func TestLoginCQRS_Execute(t *testing.T) {
 		case exception.ErrEmptyInput:
 		}
 
-		response, err := auth.NewLoginUseCase(userRepository).Execute(cmd)
+		tracer := tracing.NewEmptyTracerProvider("application")
+		response, err := auth.NewLoginUseCase(tracer, userRepository).Execute(context.TODO(), cmd)
 		if err != nil {
 			assert.ErrorIs(t, testcase.ExpectedErr, err)
 			continue

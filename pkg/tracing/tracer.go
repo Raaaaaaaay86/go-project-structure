@@ -41,6 +41,14 @@ func NewStdOutTracerProvider(serviceName string) *trace.TracerProvider {
 	return trace.NewTracerProvider(trace.WithResource(traceResource), trace.WithBatcher(traceExporter))
 }
 
+func NewEmptyTracerProvider(serviceName string) *trace.TracerProvider {
+	traceResource, err := newTraceResource(serviceName)
+	if err != nil {
+		panic(err)
+	}
+	return trace.NewTracerProvider(trace.WithResource(traceResource))
+}
+
 func NewJaegerTracerProvider(serviceName string) *trace.TracerProvider {
 	traceResource, err := newTraceResource(serviceName)
 	if err != nil {
