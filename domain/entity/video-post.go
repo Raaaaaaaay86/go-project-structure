@@ -11,7 +11,7 @@ type VideoPost struct {
 	Description string       `json:"description"`
 	Uuid        string       `json:"uuid"`
 	author      User         `json:"-"`
-	AuthorId    uint         `json:"authorId"`
+	AuthorId    uint         `json:"authorId" gorm:"foreignKey:authorId"`
 	CreatedAt   time.Time    `json:"createdAt,omitempty"`
 	UpdatedAt   time.Time    `json:"updatedAt,omitempty"`
 	DeletedAt   sql.NullTime `json:"deletedAt,omitempty"`

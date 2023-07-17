@@ -1,0 +1,1 @@
+alter table video_posts ADD COLUMN author_id integer references users(id);

@@ -1,0 +1,1 @@
+alter table video_posts drop column author_id;
