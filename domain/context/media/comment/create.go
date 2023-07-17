@@ -10,7 +10,7 @@ import (
 
 type CreateCommentCommand struct {
 	Comment  string `json:"comment"`
-	VideoId  uint   `json:"videoId,string"`
+	VideoId  uint   `json:"videoId"`
 	AuthorId uint   `json:"-"`
 }
 
