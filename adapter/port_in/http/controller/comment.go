@@ -11,17 +11,20 @@ import (
 type ICommentController interface {
 	Create(ctx *gin.Context)
 	Find(ctx *gin.Context)
+	UserDelete(ctx *gin.Context)
 }
 
 type CommentController struct {
 	CreateUseCase        comment.IVideoCommentCreateUseCase
 	FindByVideoIdUseCase comment.IFindByVideoCQRS
+	DeleteCommentUseCase comment.IDeleteCommentUseCase
 }
 
-func NewCommentController(createCommentUseCase comment.IVideoCommentCreateUseCase, findByVideoUseCase comment.IFindByVideoCQRS) *CommentController {
+func NewCommentController(createCommentUseCase comment.IVideoCommentCreateUseCase, findByVideoUseCase comment.IFindByVideoCQRS, deleteCommentUseCase comment.IDeleteCommentUseCase) *CommentController {
 	return &CommentController{
 		CreateUseCase:        createCommentUseCase,
 		FindByVideoIdUseCase: findByVideoUseCase,
+		DeleteCommentUseCase: deleteCommentUseCase,
 	}
 }
 
@@ -61,6 +64,33 @@ func (c CommentController) Find(ctx *gin.Context) {
 	response, err := c.FindByVideoIdUseCase.Execute(query)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, res.Fail(err.Error(), "unable to find comments."))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, res.Success(response))
+}
+
+func (c CommentController) UserDelete(ctx *gin.Context) {
+	var command comment.DeleteCommentCommand
+	err := ctx.ShouldBindJSON(&command)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, res.Fail(err.Error(), "invalid request body."))
+		return
+	}
+
+	token, exists := ctx.Get("token")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, res.Fail("token is not found.", nil))
+		return
+	}
+
+	claims := token.(*jwt.CustomClaim)
+	command.ExecutorId = claims.Uid
+	command.RoleIds = claims.Roles
+
+	response, err := c.DeleteCommentUseCase.Execute(command)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, res.Fail(err.Error(), nil))
 		return
 	}
 

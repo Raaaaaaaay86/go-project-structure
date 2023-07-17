@@ -3,9 +3,12 @@ package mongodb
 import (
 	"context"
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
+	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 )
 
 type VideoCommentRepository struct {
@@ -64,17 +67,24 @@ func (v VideoCommentRepository) FindById(id primitive.ObjectID) (*entity.VideoCo
 	return comment, nil
 }
 
-func (v VideoCommentRepository) DeleteById(id primitive.ObjectID) error {
+func (v VideoCommentRepository) DeleteById(id primitive.ObjectID, deleterId uint) (int, error) {
 	session, err := v.Client.StartSession()
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer session.EndSession(context.TODO())
 
-	_, err = session.WithTransaction(context.TODO(), func(sessionContext mongo.SessionContext) (interface{}, error) {
-		findResult := v.comments().FindOne(sessionContext, bson.M{"_id": id})
-		if findResult.Err() != nil {
-			return nil, findResult.Err()
+	wc := writeconcern.Majority()
+	txnOptions := options.Transaction().SetWriteConcern(wc)
+
+	deleteCount, err := session.WithTransaction(context.TODO(), func(sessionContext mongo.SessionContext) (interface{}, error) {
+		comment, err := v.FindById(id)
+		if err != nil {
+			return 0, err
+		}
+
+		if comment.AuthorId != deleterId {
+			return 0, exception.ErrUnauthorized
 		}
 
 		deleteResult, err := v.comments().DeleteOne(sessionContext, bson.M{"_id": id})
@@ -82,11 +92,20 @@ func (v VideoCommentRepository) DeleteById(id primitive.ObjectID) error {
 			return nil, err
 		}
 
-		return deleteResult, nil
-	})
+		return deleteResult.DeletedCount, nil
+	}, txnOptions)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	return int(deleteCount.(int64)), nil
+}
+
+func (v VideoCommentRepository) ForceDeleteById(id primitive.ObjectID) (int, error) {
+	deleteResult, err := v.comments().DeleteOne(context.TODO(), bson.M{"_id": id})
+	if err != nil {
+		return 0, err
+	}
+
+	return int(deleteResult.DeletedCount), nil
 }

@@ -9,5 +9,5 @@ type VideoCommentRepository interface {
 	Create(comment *entity.VideoComment) error
 	FindByVideoId(videoId uint) ([]*entity.VideoComment, error)
 	FindById(id primitive.ObjectID) (*entity.VideoComment, error)
-	DeleteById(id primitive.ObjectID) error
+	DeleteById(id primitive.ObjectID, deleterId uint) (int, error)
 }
