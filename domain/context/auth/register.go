@@ -1,11 +1,14 @@
 package auth
 
 import (
+	"context"
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
 	"github.com/raaaaaaaay86/go-project-structure/domain/repository"
 	"github.com/raaaaaaaay86/go-project-structure/domain/vo"
 	"github.com/raaaaaaaay86/go-project-structure/domain/vo/enum/role"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
+	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 type RegisterUserCommand struct {
@@ -20,18 +23,25 @@ type RegisterUserResponse struct {
 }
 
 type IRegisterUserUseCase interface {
-	Execute(command RegisterUserCommand) (*RegisterUserResponse, error)
+	Execute(ctx context.Context, command RegisterUserCommand) (*RegisterUserResponse, error)
 }
 
 type RegisterUserUseCase struct {
 	userRepository repository.UserRepository
+	TracerProvider *trace.TracerProvider
 }
 
-func NewRegisterUserUseCase(userRepository repository.UserRepository) *RegisterUserUseCase {
-	return &RegisterUserUseCase{userRepository: userRepository}
+func NewRegisterUserUseCase(tracerProvider *trace.TracerProvider, userRepository repository.UserRepository) *RegisterUserUseCase {
+	return &RegisterUserUseCase{
+		userRepository: userRepository,
+		TracerProvider: tracerProvider,
+	}
 }
 
-func (u RegisterUserUseCase) Execute(cmd RegisterUserCommand) (*RegisterUserResponse, error) {
+func (u RegisterUserUseCase) Execute(ctx context.Context, cmd RegisterUserCommand) (*RegisterUserResponse, error) {
+	newCtx, span := tracing.ApplicationSpanFactory(u.TracerProvider, ctx, pkg, "RegisterUserUseCase.Execute")
+	defer span.End()
+
 	err := validate.Do(cmd.Email, cmd.DecryptedPassword)
 	if err != nil {
 		return nil, err
@@ -39,8 +49,9 @@ func (u RegisterUserUseCase) Execute(cmd RegisterUserCommand) (*RegisterUserResp
 
 	user := entity.NewUser(cmd.Username, cmd.DecryptedPassword.Encrypt(), cmd.Email, *(entity.NewRole(role.User)))
 
-	err = u.userRepository.Create(user)
+	err = u.userRepository.Create(newCtx, user)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 

@@ -3,7 +3,10 @@
 package mocks
 
 import (
+	context "context"
+
 	comment "github.com/raaaaaaaay86/go-project-structure/domain/context/media/comment"
+
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -12,25 +15,25 @@ type IFindByVideoCQRS struct {
 	mock.Mock
 }
 
-// Execute provides a mock function with given fields: query
-func (_m *IFindByVideoCQRS) Execute(query comment.FindByVideoQuery) (*comment.FindByVideoResponse, error) {
-	ret := _m.Called(query)
+// Execute provides a mock function with given fields: ctx, query
+func (_m *IFindByVideoCQRS) Execute(ctx context.Context, query comment.FindByVideoQuery) (*comment.FindByVideoResponse, error) {
+	ret := _m.Called(ctx, query)
 
 	var r0 *comment.FindByVideoResponse
 	var r1 error
-	if rf, ok := ret.Get(0).(func(comment.FindByVideoQuery) (*comment.FindByVideoResponse, error)); ok {
-		return rf(query)
+	if rf, ok := ret.Get(0).(func(context.Context, comment.FindByVideoQuery) (*comment.FindByVideoResponse, error)); ok {
+		return rf(ctx, query)
 	}
-	if rf, ok := ret.Get(0).(func(comment.FindByVideoQuery) *comment.FindByVideoResponse); ok {
-		r0 = rf(query)
+	if rf, ok := ret.Get(0).(func(context.Context, comment.FindByVideoQuery) *comment.FindByVideoResponse); ok {
+		r0 = rf(ctx, query)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*comment.FindByVideoResponse)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(comment.FindByVideoQuery) error); ok {
-		r1 = rf(query)
+	if rf, ok := ret.Get(1).(func(context.Context, comment.FindByVideoQuery) error); ok {
+		r1 = rf(ctx, query)
 	} else {
 		r1 = ret.Error(1)
 	}

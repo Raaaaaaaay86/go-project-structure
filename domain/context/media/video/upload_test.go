@@ -1,11 +1,13 @@
 package video_test
 
 import (
+	"context"
 	"fmt"
 	"github.com/raaaaaaaay86/go-project-structure/domain/context/media/video"
 	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/mocks"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/bucket"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"io"
@@ -83,7 +85,8 @@ func TestVideoUploadCQRS_Execute(t *testing.T) {
 		case exception.ErrEmptyInput, exception.ErrEmptyFile:
 		}
 
-		response, err := video.NewUploadVideoUseCase(uploader, ffmpeg).Execute(cmd)
+		ctx := context.Background()
+		response, err := video.NewUploadVideoUseCase(tracing.NewEmptyTracerProvider(), uploader, ffmpeg).Execute(ctx, cmd)
 		if err != nil {
 			assert.ErrorIs(t, tc.ExpectedErr, err)
 			continue

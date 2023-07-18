@@ -1,12 +1,14 @@
 package auth_test
 
 import (
+	"context"
 	r "github.com/raaaaaaaay86/go-project-structure/domain/context/auth"
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
 	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/domain/vo"
 	"github.com/raaaaaaaay86/go-project-structure/domain/vo/enum/role"
 	"github.com/raaaaaaaay86/go-project-structure/mocks"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -22,7 +24,7 @@ func TestRegisterUseCase_Execute(t *testing.T) {
 	}
 
 	userRepo := mocks.NewUserRepository(t)
-	register := r.NewRegisterUserUseCase(userRepo)
+	register := r.NewRegisterUserUseCase(tracing.NewEmptyTracerProvider(), userRepo)
 
 	testCases := []RegisterTestCase{
 		{
@@ -62,10 +64,10 @@ func TestRegisterUseCase_Execute(t *testing.T) {
 		)
 
 		if tc.ExceptedErr == nil {
-			userRepo.On("Create", mock.IsType(newUser)).Return(nil).Once()
+			userRepo.On("Create", mock.Anything, mock.IsType(newUser)).Return(nil).Once()
 		}
 
-		response, err := register.Execute(cmd)
+		response, err := register.Execute(context.TODO(), cmd)
 		if err != nil {
 			assert.ErrorIs(t, tc.ExceptedErr, err)
 			continue

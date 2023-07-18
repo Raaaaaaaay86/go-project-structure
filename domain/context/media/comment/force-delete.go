@@ -5,7 +5,9 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/domain/repository"
 	"github.com/raaaaaaaay86/go-project-structure/domain/vo/enum/role"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 type ForceDeleteCommentCommand struct {
@@ -24,15 +26,20 @@ type IForceDeleteCommentUseCase interface {
 
 type ForceDeleteCommentUseCase struct {
 	VideoCommentRepository repository.VideoCommentRepository
+	TracerProvider         *trace.TracerProvider
 }
 
-func NewForceDeleteCommentUseCase(videoCommentRepository repository.VideoCommentRepository) *ForceDeleteCommentUseCase {
+func NewForceDeleteCommentUseCase(tracerProvider *trace.TracerProvider, videoCommentRepository repository.VideoCommentRepository) *ForceDeleteCommentUseCase {
 	return &ForceDeleteCommentUseCase{
 		VideoCommentRepository: videoCommentRepository,
+		TracerProvider:         tracerProvider,
 	}
 }
 
-func (uc ForceDeleteCommentUseCase) Execute(_ context.Context, cmd ForceDeleteCommentCommand) (*ForceDeleteCommentResponse, error) {
+func (uc ForceDeleteCommentUseCase) Execute(ctx context.Context, cmd ForceDeleteCommentCommand) (*ForceDeleteCommentResponse, error) {
+	newCtx, span := tracing.ApplicationSpanFactory(uc.TracerProvider, ctx, pkg, "ForceDeleteCommentUseCase.Execute")
+	defer span.End()
+
 	isAdmin := false
 	for _, roleId := range cmd.RoleIds {
 		if roleId == role.Admin || roleId == role.SuperAdmin {
@@ -44,8 +51,9 @@ func (uc ForceDeleteCommentUseCase) Execute(_ context.Context, cmd ForceDeleteCo
 		return nil, exception.ErrUnauthorized
 	}
 
-	deleteCount, err := uc.VideoCommentRepository.ForceDeleteById(cmd.CommentId)
+	deleteCount, err := uc.VideoCommentRepository.ForceDeleteById(newCtx, cmd.CommentId)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 

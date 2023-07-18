@@ -6,6 +6,7 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/domain/repository"
 	"github.com/raaaaaaaay86/go-project-structure/domain/vo"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/jwt"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
 	"go.opentelemetry.io/otel/sdk/trace"
 )
@@ -43,7 +44,7 @@ func NewLoginUseCase(tracer *trace.TracerProvider, userRepository repository.Use
 }
 
 func (c LoginUserUseCase) Execute(ctx context.Context, cmd LoginUserCommand) (*LoginUserResponse, error) {
-	_, span := c.TracerProvider.Tracer(pkg).Start(ctx, "LoginUserUseCase.Execute")
+	newCtx, span := tracing.ApplicationSpanFactory(c.TracerProvider, ctx, pkg, "LoginUserUseCase.Execute")
 	defer span.End()
 
 	err := validate.Do(cmd)
@@ -51,8 +52,9 @@ func (c LoginUserUseCase) Execute(ctx context.Context, cmd LoginUserCommand) (*L
 		return nil, err
 	}
 
-	user, err := c.UserRepository.WithPreload().FindByUsername(cmd.Username)
+	user, err := c.UserRepository.FindByUsername(newCtx, cmd.Username)
 	if err != nil {
+		span.RecordError(err)
 		return nil, exception.ErrUserNotFound
 	}
 

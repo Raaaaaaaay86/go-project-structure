@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	entity "github.com/raaaaaaaay86/go-project-structure/domain/entity"
 	mock "github.com/stretchr/testify/mock"
 
@@ -14,13 +16,13 @@ type VideoCommentRepository struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: comment
-func (_m *VideoCommentRepository) Create(comment *entity.VideoComment) error {
-	ret := _m.Called(comment)
+// Create provides a mock function with given fields: ctx, comment
+func (_m *VideoCommentRepository) Create(ctx context.Context, comment *entity.VideoComment) error {
+	ret := _m.Called(ctx, comment)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*entity.VideoComment) error); ok {
-		r0 = rf(comment)
+	if rf, ok := ret.Get(0).(func(context.Context, *entity.VideoComment) error); ok {
+		r0 = rf(ctx, comment)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -28,23 +30,23 @@ func (_m *VideoCommentRepository) Create(comment *entity.VideoComment) error {
 	return r0
 }
 
-// DeleteById provides a mock function with given fields: id, deleterId
-func (_m *VideoCommentRepository) DeleteById(id primitive.ObjectID, deleterId uint) (int, error) {
-	ret := _m.Called(id, deleterId)
+// DeleteById provides a mock function with given fields: ctx, id, deleterId
+func (_m *VideoCommentRepository) DeleteById(ctx context.Context, id primitive.ObjectID, deleterId uint) (int, error) {
+	ret := _m.Called(ctx, id, deleterId)
 
 	var r0 int
 	var r1 error
-	if rf, ok := ret.Get(0).(func(primitive.ObjectID, uint) (int, error)); ok {
-		return rf(id, deleterId)
+	if rf, ok := ret.Get(0).(func(context.Context, primitive.ObjectID, uint) (int, error)); ok {
+		return rf(ctx, id, deleterId)
 	}
-	if rf, ok := ret.Get(0).(func(primitive.ObjectID, uint) int); ok {
-		r0 = rf(id, deleterId)
+	if rf, ok := ret.Get(0).(func(context.Context, primitive.ObjectID, uint) int); ok {
+		r0 = rf(ctx, id, deleterId)
 	} else {
 		r0 = ret.Get(0).(int)
 	}
 
-	if rf, ok := ret.Get(1).(func(primitive.ObjectID, uint) error); ok {
-		r1 = rf(id, deleterId)
+	if rf, ok := ret.Get(1).(func(context.Context, primitive.ObjectID, uint) error); ok {
+		r1 = rf(ctx, id, deleterId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -52,25 +54,25 @@ func (_m *VideoCommentRepository) DeleteById(id primitive.ObjectID, deleterId ui
 	return r0, r1
 }
 
-// FindById provides a mock function with given fields: id
-func (_m *VideoCommentRepository) FindById(id primitive.ObjectID) (*entity.VideoComment, error) {
-	ret := _m.Called(id)
+// FindById provides a mock function with given fields: ctx, id
+func (_m *VideoCommentRepository) FindById(ctx context.Context, id primitive.ObjectID) (*entity.VideoComment, error) {
+	ret := _m.Called(ctx, id)
 
 	var r0 *entity.VideoComment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(primitive.ObjectID) (*entity.VideoComment, error)); ok {
-		return rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, primitive.ObjectID) (*entity.VideoComment, error)); ok {
+		return rf(ctx, id)
 	}
-	if rf, ok := ret.Get(0).(func(primitive.ObjectID) *entity.VideoComment); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, primitive.ObjectID) *entity.VideoComment); ok {
+		r0 = rf(ctx, id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*entity.VideoComment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(primitive.ObjectID) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(context.Context, primitive.ObjectID) error); ok {
+		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -78,25 +80,25 @@ func (_m *VideoCommentRepository) FindById(id primitive.ObjectID) (*entity.Video
 	return r0, r1
 }
 
-// FindByVideoId provides a mock function with given fields: videoId
-func (_m *VideoCommentRepository) FindByVideoId(videoId uint) ([]*entity.VideoComment, error) {
-	ret := _m.Called(videoId)
+// FindByVideoId provides a mock function with given fields: ctx, videoId
+func (_m *VideoCommentRepository) FindByVideoId(ctx context.Context, videoId uint) ([]*entity.VideoComment, error) {
+	ret := _m.Called(ctx, videoId)
 
 	var r0 []*entity.VideoComment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(uint) ([]*entity.VideoComment, error)); ok {
-		return rf(videoId)
+	if rf, ok := ret.Get(0).(func(context.Context, uint) ([]*entity.VideoComment, error)); ok {
+		return rf(ctx, videoId)
 	}
-	if rf, ok := ret.Get(0).(func(uint) []*entity.VideoComment); ok {
-		r0 = rf(videoId)
+	if rf, ok := ret.Get(0).(func(context.Context, uint) []*entity.VideoComment); ok {
+		r0 = rf(ctx, videoId)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*entity.VideoComment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(uint) error); ok {
-		r1 = rf(videoId)
+	if rf, ok := ret.Get(1).(func(context.Context, uint) error); ok {
+		r1 = rf(ctx, videoId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -104,23 +106,23 @@ func (_m *VideoCommentRepository) FindByVideoId(videoId uint) ([]*entity.VideoCo
 	return r0, r1
 }
 
-// ForceDeleteById provides a mock function with given fields: id
-func (_m *VideoCommentRepository) ForceDeleteById(id primitive.ObjectID) (int, error) {
-	ret := _m.Called(id)
+// ForceDeleteById provides a mock function with given fields: ctx, id
+func (_m *VideoCommentRepository) ForceDeleteById(ctx context.Context, id primitive.ObjectID) (int, error) {
+	ret := _m.Called(ctx, id)
 
 	var r0 int
 	var r1 error
-	if rf, ok := ret.Get(0).(func(primitive.ObjectID) (int, error)); ok {
-		return rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, primitive.ObjectID) (int, error)); ok {
+		return rf(ctx, id)
 	}
-	if rf, ok := ret.Get(0).(func(primitive.ObjectID) int); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, primitive.ObjectID) int); ok {
+		r0 = rf(ctx, id)
 	} else {
 		r0 = ret.Get(0).(int)
 	}
 
-	if rf, ok := ret.Get(1).(func(primitive.ObjectID) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(context.Context, primitive.ObjectID) error); ok {
+		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)
 	}

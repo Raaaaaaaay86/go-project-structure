@@ -1,11 +1,14 @@
 package video_test
 
 import (
+	"context"
 	"github.com/raaaaaaaay86/go-project-structure/domain/context/media/video"
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
 	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/mocks"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
 	"testing"
 )
@@ -89,10 +92,10 @@ func TestUpdateVideoInfoUseCase_Execute(t *testing.T) {
 
 		switch tc.ExpectedError {
 		case nil:
-			videoPostRepository.On("FindById", tc.VideoId).Return(oldVideo, nil).Once()
-			videoPostRepository.On("Update", updatedVideo).Return(nil).Once()
+			videoPostRepository.On("FindById", mock.Anything, tc.VideoId).Return(oldVideo, nil).Once()
+			videoPostRepository.On("Update", mock.Anything, updatedVideo).Return(nil).Once()
 		case exception.ErrUnauthorized:
-			videoPostRepository.On("FindById", tc.VideoId).Return(oldVideo, nil).Once()
+			videoPostRepository.On("FindById", mock.Anything, tc.VideoId).Return(oldVideo, nil).Once()
 		case exception.ErrEmptyInput:
 		}
 
@@ -102,7 +105,7 @@ func TestUpdateVideoInfoUseCase_Execute(t *testing.T) {
 			Title:       tc.UpdateTitle,
 			Description: tc.UpdateDescription,
 		}
-		response, err := video.NewUpdateVideoInfoUseCase(videoPostRepository, db).Execute(cmd)
+		response, err := video.NewUpdateVideoInfoUseCase(tracing.NewEmptyTracerProvider(), videoPostRepository, db).Execute(context.TODO(), cmd)
 		if err != nil || tc.ExpectedError != nil {
 			assert.ErrorIs(t, tc.ExpectedError, err)
 			continue

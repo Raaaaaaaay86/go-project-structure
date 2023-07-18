@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	entity "github.com/raaaaaaaay86/go-project-structure/domain/entity"
 	mock "github.com/stretchr/testify/mock"
 
@@ -14,13 +16,13 @@ type UserRepository struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: user
-func (_m *UserRepository) Create(user *entity.User) error {
-	ret := _m.Called(user)
+// Create provides a mock function with given fields: ctx, user
+func (_m *UserRepository) Create(ctx context.Context, user *entity.User) error {
+	ret := _m.Called(ctx, user)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*entity.User) error); ok {
-		r0 = rf(user)
+	if rf, ok := ret.Get(0).(func(context.Context, *entity.User) error); ok {
+		r0 = rf(ctx, user)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -28,25 +30,25 @@ func (_m *UserRepository) Create(user *entity.User) error {
 	return r0
 }
 
-// FindById provides a mock function with given fields: id
-func (_m *UserRepository) FindById(id uint) (*entity.User, error) {
-	ret := _m.Called(id)
+// FindById provides a mock function with given fields: ctx, id
+func (_m *UserRepository) FindById(ctx context.Context, id uint) (*entity.User, error) {
+	ret := _m.Called(ctx, id)
 
 	var r0 *entity.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(uint) (*entity.User, error)); ok {
-		return rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, uint) (*entity.User, error)); ok {
+		return rf(ctx, id)
 	}
-	if rf, ok := ret.Get(0).(func(uint) *entity.User); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, uint) *entity.User); ok {
+		r0 = rf(ctx, id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*entity.User)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(uint) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(context.Context, uint) error); ok {
+		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -54,25 +56,25 @@ func (_m *UserRepository) FindById(id uint) (*entity.User, error) {
 	return r0, r1
 }
 
-// FindByUsername provides a mock function with given fields: username
-func (_m *UserRepository) FindByUsername(username string) (*entity.User, error) {
-	ret := _m.Called(username)
+// FindByUsername provides a mock function with given fields: ctx, username
+func (_m *UserRepository) FindByUsername(ctx context.Context, username string) (*entity.User, error) {
+	ret := _m.Called(ctx, username)
 
 	var r0 *entity.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (*entity.User, error)); ok {
-		return rf(username)
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*entity.User, error)); ok {
+		return rf(ctx, username)
 	}
-	if rf, ok := ret.Get(0).(func(string) *entity.User); ok {
-		r0 = rf(username)
+	if rf, ok := ret.Get(0).(func(context.Context, string) *entity.User); ok {
+		r0 = rf(ctx, username)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*entity.User)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(username)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, username)
 	} else {
 		r1 = ret.Error(1)
 	}

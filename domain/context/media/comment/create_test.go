@@ -1,10 +1,12 @@
 package comment_test
 
 import (
+	"context"
 	"github.com/raaaaaaaay86/go-project-structure/domain/context/media/comment"
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
 	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/mocks"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"gorm.io/gorm"
@@ -55,20 +57,20 @@ func TestCreateCommentUseCase_Execute(t *testing.T) {
 
 		switch tc.ExpectedError {
 		case nil:
-			videoPostRepository.On("FindById", tc.VideoId).
+			videoPostRepository.On("FindById", mock.Anything, tc.VideoId).
 				Return(&entity.VideoPost{Id: tc.VideoId}, tc.ExpectedError).
 				Once()
-			userRepository.On("FindById", tc.AuthorId).
+			userRepository.On("FindById", mock.Anything, tc.AuthorId).
 				Return(&entity.User{Id: tc.AuthorId}, tc.ExpectedError).
 				Once()
-			videoCommentRepository.On("Create", mock.AnythingOfType("*entity.VideoComment")).
+			videoCommentRepository.On("Create", mock.Anything, mock.AnythingOfType("*entity.VideoComment")).
 				Return(nil).
 				Once()
 		case gorm.ErrRecordNotFound:
-			videoPostRepository.On("FindById", tc.VideoId).
+			videoPostRepository.On("FindById", mock.Anything, tc.VideoId).
 				Return(&entity.VideoPost{Id: tc.VideoId}, tc.ExpectedError).
 				Maybe()
-			userRepository.On("FindById", tc.AuthorId).
+			userRepository.On("FindById", mock.Anything, tc.AuthorId).
 				Return(&entity.User{Id: tc.AuthorId}, tc.ExpectedError).
 				Maybe()
 		case exception.ErrEmptyInput:
@@ -79,8 +81,8 @@ func TestCreateCommentUseCase_Execute(t *testing.T) {
 			VideoId:  tc.VideoId,
 			Comment:  tc.Comment,
 		}
-		useCase := comment.NewCreateCommentUseCase(videoCommentRepository, userRepository, videoPostRepository)
-		response, err := useCase.Execute(cmd)
+		useCase := comment.NewCreateCommentUseCase(tracing.NewEmptyTracerProvider(), videoCommentRepository, userRepository, videoPostRepository)
+		response, err := useCase.Execute(context.TODO(), cmd)
 		if err != nil {
 			assert.ErrorIs(t, tc.ExpectedError, err)
 			continue

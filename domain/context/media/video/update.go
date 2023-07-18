@@ -1,10 +1,13 @@
 package video
 
 import (
+	"context"
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
 	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/domain/repository"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
+	"go.opentelemetry.io/otel/sdk/trace"
 	"gorm.io/gorm"
 )
 
@@ -42,16 +45,21 @@ type IUpdateVideoInfoUseCase interface {
 type UpdateVideoInfoUseCase struct {
 	VideoPostRepository repository.VideoPostRepository
 	DB                  *gorm.DB
+	TracerProvider      *trace.TracerProvider
 }
 
-func NewUpdateVideoInfoUseCase(videoPostRepository repository.VideoPostRepository, DB *gorm.DB) *UpdateVideoInfoUseCase {
+func NewUpdateVideoInfoUseCase(tracerProvider *trace.TracerProvider, videoPostRepository repository.VideoPostRepository, DB *gorm.DB) *UpdateVideoInfoUseCase {
 	return &UpdateVideoInfoUseCase{
 		VideoPostRepository: videoPostRepository,
 		DB:                  DB,
+		TracerProvider:      tracerProvider,
 	}
 }
 
-func (uc UpdateVideoInfoUseCase) Execute(cmd UpdateVideoInfoCommand) (*UpdateVideoInfoResponse, error) {
+func (uc UpdateVideoInfoUseCase) Execute(ctx context.Context, cmd UpdateVideoInfoCommand) (*UpdateVideoInfoResponse, error) {
+	newCtx, span := tracing.ApplicationSpanFactory(uc.TracerProvider, ctx, pkg, "UpdateVideoInfoUseCase.Execute")
+	defer span.End()
+
 	err := validate.Do(cmd)
 	if err != nil {
 		return nil, err
@@ -59,8 +67,9 @@ func (uc UpdateVideoInfoUseCase) Execute(cmd UpdateVideoInfoCommand) (*UpdateVid
 
 	tx := uc.VideoPostRepository.StartTx()
 
-	video, err := uc.VideoPostRepository.WithTx(tx).FindById(cmd.VideoId)
+	video, err := uc.VideoPostRepository.WithTx(tx).FindById(newCtx, cmd.VideoId)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 
@@ -72,8 +81,9 @@ func (uc UpdateVideoInfoUseCase) Execute(cmd UpdateVideoInfoCommand) (*UpdateVid
 	video.Title = cmd.Title
 	video.Description = cmd.Description
 
-	err = uc.VideoPostRepository.WithTx(tx).ForUpdate().Update(video)
+	err = uc.VideoPostRepository.WithTx(tx).ForUpdate().Update(newCtx, video)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 

@@ -1,10 +1,13 @@
 package video
 
 import (
+	"context"
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
 	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/domain/repository"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
+	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 type CreateVideoCommand struct {
@@ -32,36 +35,43 @@ type CreateVideoResponse struct {
 }
 
 type IVideoCreateUseCase interface {
-	Execute(cmd CreateVideoCommand) (*CreateVideoResponse, error)
+	Execute(ctx context.Context, cmd CreateVideoCommand) (*CreateVideoResponse, error)
 }
 
 type VideoCreateUseCase struct {
 	VideoPostRepository repository.VideoPostRepository
 	UserRepository      repository.UserRepository
+	TracerProvider      *trace.TracerProvider
 }
 
-func NewCreateVideoUseCase(videoPostRepository repository.VideoPostRepository, userRepository repository.UserRepository) *VideoCreateUseCase {
+func NewCreateVideoUseCase(tracerProvider *trace.TracerProvider, videoPostRepository repository.VideoPostRepository, userRepository repository.UserRepository) *VideoCreateUseCase {
 	return &VideoCreateUseCase{
 		VideoPostRepository: videoPostRepository,
 		UserRepository:      userRepository,
+		TracerProvider:      tracerProvider,
 	}
 }
 
-func (v VideoCreateUseCase) Execute(cmd CreateVideoCommand) (*CreateVideoResponse, error) {
+func (v VideoCreateUseCase) Execute(ctx context.Context, cmd CreateVideoCommand) (*CreateVideoResponse, error) {
+	newCtx, span := tracing.ApplicationSpanFactory(v.TracerProvider, ctx, pkg, "VideoCreateUseCase.Execute")
+	defer span.End()
+
 	err := validate.Do(cmd)
 	if err != nil {
 		return nil, err
 	}
 
-	author, err := v.UserRepository.FindById(cmd.AuthorId)
+	author, err := v.UserRepository.FindById(newCtx, cmd.AuthorId)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 
 	newPost := entity.NewVideoPost(cmd.Title, cmd.Description, cmd.VideoUUID, *author)
 
-	err = v.VideoPostRepository.Create(newPost)
+	err = v.VideoPostRepository.Create(newCtx, newPost)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 

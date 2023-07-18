@@ -1,11 +1,14 @@
 package video_test
 
 import (
+	"context"
 	"github.com/raaaaaaaay86/go-project-structure/domain/context/media/video"
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
 	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/mocks"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"testing"
 )
 
@@ -70,14 +73,14 @@ func TestVideoCreateCQRS_Execute(t *testing.T) {
 		userRepository := mocks.NewUserRepository(t)
 		switch tc.ExpectedError {
 		case nil:
-			userRepository.On("FindById", cmd.AuthorId).Return(&tc.Author, nil).Once()
+			userRepository.On("FindById", mock.Anything, cmd.AuthorId).Return(&tc.Author, nil).Once()
 
 			post := entity.NewVideoPost(cmd.Title, cmd.Description, cmd.VideoUUID, tc.Author)
-			videoRepository.On("Create", post).Return(nil).Once()
+			videoRepository.On("Create", mock.Anything, post).Return(nil).Once()
 		case exception.ErrEmptyInput:
 		}
 
-		_, err := video.NewCreateVideoUseCase(videoRepository, userRepository).Execute(cmd)
+		_, err := video.NewCreateVideoUseCase(tracing.NewEmptyTracerProvider(), videoRepository, userRepository).Execute(context.TODO(), cmd)
 		if err != nil {
 			assert.ErrorIs(t, tc.ExpectedError, err)
 			continue

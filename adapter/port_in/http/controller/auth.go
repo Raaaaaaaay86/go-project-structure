@@ -20,7 +20,7 @@ type AuthenticationController struct {
 	TracerProvider  *trace.TracerProvider
 }
 
-func NewAuthenticationController(registerUseCase auth.IRegisterUserUseCase, loginUseCase auth.ILoginUserResponse, tracerProvider *trace.TracerProvider) AuthenticationController {
+func NewAuthenticationController(tracerProvider *trace.TracerProvider, registerUseCase auth.IRegisterUserUseCase, loginUseCase auth.ILoginUserResponse) AuthenticationController {
 	return AuthenticationController{
 		RegisterUseCase: registerUseCase,
 		LoginUseCase:    loginUseCase,
@@ -39,16 +39,21 @@ func NewAuthenticationController(registerUseCase auth.IRegisterUserUseCase, logi
 //		@Router						/v1/auth/register [post]
 //	 @Security BearerAuth
 func (a AuthenticationController) Register(ctx *gin.Context) {
+	newCtx, span := tracing.HttpSpanFactory(a.TracerProvider, ctx, pkg)
+	defer span.End()
+
 	var command auth.RegisterUserCommand
 	err := ctx.ShouldBindJSON(&command)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, res.Fail(err.Error(), nil))
+		tracing.RecordHttpError(span, http.StatusBadRequest, err)
 		return
 	}
 
-	response, err := a.RegisterUseCase.Execute(command)
+	response, err := a.RegisterUseCase.Execute(newCtx, command)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, res.Fail(err.Error(), nil))
+		ctx.JSON(http.StatusInternalServerError, res.Fail(err.Error(), nil))
+		tracing.RecordHttpError(span, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -73,12 +78,14 @@ func (a AuthenticationController) Login(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(&command)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, res.Fail(err.Error(), nil))
+		tracing.RecordHttpError(span, http.StatusBadRequest, err)
 		return
 	}
 
 	response, err := a.LoginUseCase.Execute(newCtx, command)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, res.Fail(err.Error(), nil))
+		ctx.JSON(http.StatusInternalServerError, res.Fail(err.Error(), nil))
+		tracing.RecordHttpError(span, http.StatusInternalServerError, err)
 		return
 	}
 

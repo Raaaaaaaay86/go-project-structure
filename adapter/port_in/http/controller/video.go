@@ -5,6 +5,8 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/domain/context/media/video"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/jwt"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/res"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
+	"go.opentelemetry.io/otel/sdk/trace"
 	"net/http"
 )
 
@@ -16,16 +18,21 @@ type IVideoController interface {
 type VideoController struct {
 	UploadVideoUseCase video.IUploadVideoUseCase
 	CreateVideoUseCase video.IVideoCreateUseCase
+	TracerProvider     *trace.TracerProvider
 }
 
-func NewVideoController(upload video.IUploadVideoUseCase, create video.IVideoCreateUseCase) *VideoController {
+func NewVideoController(tracerProvider *trace.TracerProvider, upload video.IUploadVideoUseCase, create video.IVideoCreateUseCase) *VideoController {
 	return &VideoController{
 		UploadVideoUseCase: upload,
 		CreateVideoUseCase: create,
+		TracerProvider:     tracerProvider,
 	}
 }
 
 func (v VideoController) Upload(ctx *gin.Context) {
+	newCtx, span := tracing.HttpSpanFactory(v.TracerProvider, ctx, pkg)
+	defer span.End()
+
 	fileHeader, err := ctx.FormFile("v")
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, res.Fail(err.Error(), "file is not included in request."))
@@ -50,7 +57,7 @@ func (v VideoController) Upload(ctx *gin.Context) {
 		FileName:   fileHeader.Filename,
 		UploaderId: (token.(*jwt.CustomClaim)).Uid,
 	}
-	response, err := v.UploadVideoUseCase.Execute(cmd)
+	response, err := v.UploadVideoUseCase.Execute(newCtx, cmd)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, res.Fail(err.Error(), nil))
 		return
@@ -60,6 +67,9 @@ func (v VideoController) Upload(ctx *gin.Context) {
 }
 
 func (v VideoController) Create(ctx *gin.Context) {
+	newCtx, span := tracing.HttpSpanFactory(v.TracerProvider, ctx, pkg)
+	defer span.End()
+
 	token, exists := ctx.Get("token")
 	if !exists {
 		ctx.JSON(http.StatusUnauthorized, res.Fail("token is not found.", nil))
@@ -75,7 +85,7 @@ func (v VideoController) Create(ctx *gin.Context) {
 		return
 	}
 
-	response, err := v.CreateVideoUseCase.Execute(cmd)
+	response, err := v.CreateVideoUseCase.Execute(newCtx, cmd)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, res.Fail(err.Error(), "unable to create video post."))
 		return

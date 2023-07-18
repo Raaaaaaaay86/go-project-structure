@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	entity "github.com/raaaaaaaay86/go-project-structure/domain/entity"
 	gorm "gorm.io/gorm"
 
@@ -32,13 +34,13 @@ func (_m *VideoPostRepository) CommitTx(tx *gorm.DB) *gorm.DB {
 	return r0
 }
 
-// Create provides a mock function with given fields: post
-func (_m *VideoPostRepository) Create(post *entity.VideoPost) error {
-	ret := _m.Called(post)
+// Create provides a mock function with given fields: ctx, post
+func (_m *VideoPostRepository) Create(ctx context.Context, post *entity.VideoPost) error {
+	ret := _m.Called(ctx, post)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*entity.VideoPost) error); ok {
-		r0 = rf(post)
+	if rf, ok := ret.Get(0).(func(context.Context, *entity.VideoPost) error); ok {
+		r0 = rf(ctx, post)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -46,25 +48,25 @@ func (_m *VideoPostRepository) Create(post *entity.VideoPost) error {
 	return r0
 }
 
-// FindById provides a mock function with given fields: id
-func (_m *VideoPostRepository) FindById(id uint) (*entity.VideoPost, error) {
-	ret := _m.Called(id)
+// FindById provides a mock function with given fields: ctx, id
+func (_m *VideoPostRepository) FindById(ctx context.Context, id uint) (*entity.VideoPost, error) {
+	ret := _m.Called(ctx, id)
 
 	var r0 *entity.VideoPost
 	var r1 error
-	if rf, ok := ret.Get(0).(func(uint) (*entity.VideoPost, error)); ok {
-		return rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, uint) (*entity.VideoPost, error)); ok {
+		return rf(ctx, id)
 	}
-	if rf, ok := ret.Get(0).(func(uint) *entity.VideoPost); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(context.Context, uint) *entity.VideoPost); ok {
+		r0 = rf(ctx, id)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*entity.VideoPost)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(uint) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(context.Context, uint) error); ok {
+		r1 = rf(ctx, id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -104,13 +106,13 @@ func (_m *VideoPostRepository) StartTx() *gorm.DB {
 	return r0
 }
 
-// Update provides a mock function with given fields: post
-func (_m *VideoPostRepository) Update(post *entity.VideoPost) error {
-	ret := _m.Called(post)
+// Update provides a mock function with given fields: ctx, post
+func (_m *VideoPostRepository) Update(ctx context.Context, post *entity.VideoPost) error {
+	ret := _m.Called(ctx, post)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*entity.VideoPost) error); ok {
-		r0 = rf(post)
+	if rf, ok := ret.Get(0).(func(context.Context, *entity.VideoPost) error); ok {
+		r0 = rf(ctx, post)
 	} else {
 		r0 = ret.Error(0)
 	}

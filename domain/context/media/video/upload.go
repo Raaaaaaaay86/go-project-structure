@@ -1,11 +1,14 @@
 package video
 
 import (
+	"context"
 	"github.com/google/uuid"
 	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/bucket"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/convert/video"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
+	"go.opentelemetry.io/otel/sdk/trace"
 	"io"
 )
 
@@ -30,22 +33,27 @@ type UploadVideoResponse struct {
 }
 
 type IUploadVideoUseCase interface {
-	Execute(cmd UploadVideoCommand) (*UploadVideoResponse, error)
+	Execute(ctx context.Context, cmd UploadVideoCommand) (*UploadVideoResponse, error)
 }
 
 type UploadVideoUseCase struct {
-	FileUploader bucket.Uploader
-	Ffmpeg       convert.IFfmpeg
+	FileUploader   bucket.Uploader
+	Ffmpeg         convert.IFfmpeg
+	TracerProvider *trace.TracerProvider
 }
 
-func NewUploadVideoUseCase(fileUploader bucket.Uploader, ffmpeg convert.IFfmpeg) *UploadVideoUseCase {
+func NewUploadVideoUseCase(tracerProvider *trace.TracerProvider, fileUploader bucket.Uploader, ffmpeg convert.IFfmpeg) *UploadVideoUseCase {
 	return &UploadVideoUseCase{
-		FileUploader: fileUploader,
-		Ffmpeg:       ffmpeg,
+		FileUploader:   fileUploader,
+		Ffmpeg:         ffmpeg,
+		TracerProvider: tracerProvider,
 	}
 }
 
-func (c UploadVideoUseCase) Execute(cmd UploadVideoCommand) (*UploadVideoResponse, error) {
+func (c UploadVideoUseCase) Execute(ctx context.Context, cmd UploadVideoCommand) (*UploadVideoResponse, error) {
+	_, span := tracing.ApplicationSpanFactory(c.TracerProvider, ctx, pkg, "UploadVideoUseCase.Execute")
+	defer span.End()
+
 	err := validate.Do(cmd)
 	if err != nil {
 		return nil, err
@@ -53,12 +61,14 @@ func (c UploadVideoUseCase) Execute(cmd UploadVideoCommand) (*UploadVideoRespons
 
 	result, err := c.FileUploader.Upload(cmd.File, cmd.FileName)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 
 	uid := uuid.New().String()
 	err = c.Ffmpeg.Convert(result.FullPath, uid)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 

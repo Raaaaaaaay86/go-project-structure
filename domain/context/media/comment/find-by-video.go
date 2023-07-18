@@ -1,10 +1,13 @@
 package comment
 
 import (
+	"context"
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
 	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/domain/repository"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
+	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 type FindByVideoQuery struct {
@@ -23,25 +26,33 @@ type FindByVideoResponse struct {
 }
 
 type IFindByVideoCQRS interface {
-	Execute(query FindByVideoQuery) (*FindByVideoResponse, error)
+	Execute(ctx context.Context, query FindByVideoQuery) (*FindByVideoResponse, error)
 }
 
 type FindByVideoCQRS struct {
 	VideoCommentRepository repository.VideoCommentRepository
+	TracerProvider         *trace.TracerProvider
 }
 
-func NewFindByVideoUseCase(videoCommentRepository repository.VideoCommentRepository) *FindByVideoCQRS {
-	return &FindByVideoCQRS{VideoCommentRepository: videoCommentRepository}
+func NewFindByVideoUseCase(tracerProvider *trace.TracerProvider, videoCommentRepository repository.VideoCommentRepository) *FindByVideoCQRS {
+	return &FindByVideoCQRS{
+		VideoCommentRepository: videoCommentRepository,
+		TracerProvider:         tracerProvider,
+	}
 }
 
-func (f FindByVideoCQRS) Execute(query FindByVideoQuery) (*FindByVideoResponse, error) {
+func (f FindByVideoCQRS) Execute(ctx context.Context, query FindByVideoQuery) (*FindByVideoResponse, error) {
+	newCtx, span := tracing.ApplicationSpanFactory(f.TracerProvider, ctx, pkg, "FindByVideoCQRS.Execute")
+	defer span.End()
+
 	err := validate.Do(query)
 	if err != nil {
 		return nil, err
 	}
 
-	comments, err := f.VideoCommentRepository.FindByVideoId(query.VideoId)
+	comments, err := f.VideoCommentRepository.FindByVideoId(newCtx, query.VideoId)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 	return &FindByVideoResponse{comments}, nil

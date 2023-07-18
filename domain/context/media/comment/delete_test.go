@@ -1,11 +1,14 @@
 package comment_test
 
 import (
+	"context"
 	"github.com/raaaaaaaay86/go-project-structure/domain/context/media/comment"
 	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/domain/vo/enum/role"
 	"github.com/raaaaaaaay86/go-project-structure/mocks"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"testing"
@@ -55,28 +58,28 @@ func TestDeleteCommentUseCase_Execute(t *testing.T) {
 		switch tc.ExpectedError {
 		case nil:
 			videoCommentRepository.
-				On("DeleteById", tc.CommentId, tc.ExecutorId).
+				On("DeleteById", mock.Anything, tc.CommentId, tc.ExecutorId).
 				Return(0, nil).
 				Once()
 		case mongo.ErrNoDocuments:
 			videoCommentRepository.
-				On("DeleteById", tc.CommentId, tc.ExecutorId).
+				On("DeleteById", mock.Anything, tc.CommentId, tc.ExecutorId).
 				Return(0, mongo.ErrNoDocuments).
 				Once()
 		case exception.ErrUnauthorized:
 			videoCommentRepository.
-				On("DeleteById", tc.CommentId, tc.ExecutorId).
+				On("DeleteById", mock.Anything, tc.CommentId, tc.ExecutorId).
 				Return(0, exception.ErrUnauthorized).
 				Once()
 		}
 
-		useCase := comment.NewDeleteCommentUseCase(videoCommentRepository)
+		useCase := comment.NewDeleteCommentUseCase(tracing.NewEmptyTracerProvider(), videoCommentRepository)
 		cmd := comment.DeleteCommentCommand{
 			CommentId:  tc.CommentId,
 			ExecutorId: tc.ExecutorId,
 			RoleIds:    tc.RoleIds,
 		}
-		_, err := useCase.Execute(cmd)
+		_, err := useCase.Execute(context.TODO(), cmd)
 		if err != nil {
 			assert.ErrorIs(t, tc.ExpectedError, err)
 			continue

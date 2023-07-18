@@ -3,6 +3,8 @@
 package mocks
 
 import (
+	context "context"
+
 	video "github.com/raaaaaaaay86/go-project-structure/domain/context/media/video"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -12,25 +14,25 @@ type IVideoCreateUseCase struct {
 	mock.Mock
 }
 
-// Execute provides a mock function with given fields: cmd
-func (_m *IVideoCreateUseCase) Execute(cmd video.CreateVideoCommand) (*video.CreateVideoResponse, error) {
-	ret := _m.Called(cmd)
+// Execute provides a mock function with given fields: ctx, cmd
+func (_m *IVideoCreateUseCase) Execute(ctx context.Context, cmd video.CreateVideoCommand) (*video.CreateVideoResponse, error) {
+	ret := _m.Called(ctx, cmd)
 
 	var r0 *video.CreateVideoResponse
 	var r1 error
-	if rf, ok := ret.Get(0).(func(video.CreateVideoCommand) (*video.CreateVideoResponse, error)); ok {
-		return rf(cmd)
+	if rf, ok := ret.Get(0).(func(context.Context, video.CreateVideoCommand) (*video.CreateVideoResponse, error)); ok {
+		return rf(ctx, cmd)
 	}
-	if rf, ok := ret.Get(0).(func(video.CreateVideoCommand) *video.CreateVideoResponse); ok {
-		r0 = rf(cmd)
+	if rf, ok := ret.Get(0).(func(context.Context, video.CreateVideoCommand) *video.CreateVideoResponse); ok {
+		r0 = rf(ctx, cmd)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*video.CreateVideoResponse)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(video.CreateVideoCommand) error); ok {
-		r1 = rf(cmd)
+	if rf, ok := ret.Get(1).(func(context.Context, video.CreateVideoCommand) error); ok {
+		r1 = rf(ctx, cmd)
 	} else {
 		r1 = ret.Error(1)
 	}

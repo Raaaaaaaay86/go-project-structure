@@ -59,19 +59,20 @@ func TestLoginCQRS_Execute(t *testing.T) {
 			DecryptedPassword: testcase.DecryptedPassword,
 		}
 
+		ctx := context.Background()
 		userRepository := mocks.NewUserRepository(t)
 		userRepository.On("WithPreload").Return(userRepository).Maybe()
 		expectedUser := entity.NewUser(cmd.Username, cmd.DecryptedPassword.Encrypt(), mock.Anything, *(entity.NewRole(testcase.UserRole)))
 		switch testcase.ExpectedErr {
 		case nil, exception.ErrWrongPassword:
-			userRepository.On("FindByUsername", cmd.Username).Return(expectedUser, nil).Once()
+			userRepository.On("FindByUsername", mock.Anything, cmd.Username).Return(expectedUser, nil).Once()
 		case exception.ErrUserNotFound:
-			userRepository.On("FindByUsername", cmd.Username).Return(nil, gorm.ErrRecordNotFound).Once()
+			userRepository.On("FindByUsername", mock.Anything, cmd.Username).Return(nil, gorm.ErrRecordNotFound).Once()
 		case exception.ErrEmptyInput:
 		}
 
-		tracer := tracing.NewEmptyTracerProvider("application")
-		response, err := auth.NewLoginUseCase(tracer, userRepository).Execute(context.TODO(), cmd)
+		tracer := tracing.NewEmptyTracerProvider()
+		response, err := auth.NewLoginUseCase(tracer, userRepository).Execute(ctx, cmd)
 		if err != nil {
 			assert.ErrorIs(t, testcase.ExpectedErr, err)
 			continue

@@ -1,10 +1,13 @@
 package comment
 
 import (
+	"context"
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
 	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/domain/repository"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
+	"go.opentelemetry.io/otel/sdk/trace"
 	"time"
 )
 
@@ -26,44 +29,52 @@ type CreateCommentResponse struct {
 }
 
 type IVideoCommentCreateUseCase interface {
-	Execute(cmd CreateCommentCommand) (*CreateCommentResponse, error)
+	Execute(ctx context.Context, cmd CreateCommentCommand) (*CreateCommentResponse, error)
 }
 
 type CreateCommentUseCase struct {
 	VideoCommentRepo    repository.VideoCommentRepository
 	UserRepository      repository.UserRepository
 	VideoPostRepository repository.VideoPostRepository
+	TracerProvider      *trace.TracerProvider
 }
 
-func NewCreateCommentUseCase(videoCommentRepo repository.VideoCommentRepository, userRepository repository.UserRepository, postRepository repository.VideoPostRepository) *CreateCommentUseCase {
+func NewCreateCommentUseCase(tracerProvider *trace.TracerProvider, videoCommentRepo repository.VideoCommentRepository, userRepository repository.UserRepository, postRepository repository.VideoPostRepository) *CreateCommentUseCase {
 	return &CreateCommentUseCase{
 		VideoCommentRepo:    videoCommentRepo,
 		UserRepository:      userRepository,
 		VideoPostRepository: postRepository,
+		TracerProvider:      tracerProvider,
 	}
 }
 
-func (c CreateCommentUseCase) Execute(cmd CreateCommentCommand) (*CreateCommentResponse, error) {
+func (c CreateCommentUseCase) Execute(ctx context.Context, cmd CreateCommentCommand) (*CreateCommentResponse, error) {
+	newCtx, span := tracing.ApplicationSpanFactory(c.TracerProvider, ctx, pkg, "CreateCommentUseCase.Execute")
+	defer span.End()
+
 	err := validate.Do(cmd)
 	if err != nil {
 		return nil, err
 	}
 
-	author, err := c.UserRepository.FindById(cmd.AuthorId)
+	author, err := c.UserRepository.FindById(newCtx, cmd.AuthorId)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 
-	video, err := c.VideoPostRepository.FindById(cmd.VideoId)
+	video, err := c.VideoPostRepository.FindById(newCtx, cmd.VideoId)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 
 	now := time.Now()
 	comment := entity.NewVideoComment(*video, *author, cmd.Comment, now, now)
 
-	err = c.VideoCommentRepo.Create(comment)
+	err = c.VideoCommentRepo.Create(newCtx, comment)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 

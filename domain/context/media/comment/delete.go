@@ -1,9 +1,12 @@
 package comment
 
 import (
+	"context"
 	"github.com/raaaaaaaay86/go-project-structure/domain/repository"
 	"github.com/raaaaaaaay86/go-project-structure/domain/vo/enum/role"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 type DeleteCommentCommand struct {
@@ -16,22 +19,28 @@ type DeleteCommentResponse struct {
 }
 
 type IDeleteCommentUseCase interface {
-	Execute(cmd DeleteCommentCommand) (*DeleteCommentResponse, error)
+	Execute(ctx context.Context, cmd DeleteCommentCommand) (*DeleteCommentResponse, error)
 }
 
 type DeleteCommentUseCase struct {
 	VideoCommentRepository repository.VideoCommentRepository
+	TracerProvider         *trace.TracerProvider
 }
 
-func NewDeleteCommentUseCase(videoCommentRepository repository.VideoCommentRepository) *DeleteCommentUseCase {
+func NewDeleteCommentUseCase(tracerProvider *trace.TracerProvider, videoCommentRepository repository.VideoCommentRepository) *DeleteCommentUseCase {
 	return &DeleteCommentUseCase{
 		VideoCommentRepository: videoCommentRepository,
+		TracerProvider:         tracerProvider,
 	}
 }
 
-func (d DeleteCommentUseCase) Execute(cmd DeleteCommentCommand) (*DeleteCommentResponse, error) {
-	_, err := d.VideoCommentRepository.DeleteById(cmd.CommentId, cmd.ExecutorId)
+func (d DeleteCommentUseCase) Execute(ctx context.Context, cmd DeleteCommentCommand) (*DeleteCommentResponse, error) {
+	newCtx, span := tracing.ApplicationSpanFactory(d.TracerProvider, ctx, pkg, "DeleteCommentUseCase.Execute")
+	defer span.End()
+
+	_, err := d.VideoCommentRepository.DeleteById(newCtx, cmd.CommentId, cmd.ExecutorId)
 	if err != nil {
+		span.RecordError(err)
 		return nil, err
 	}
 

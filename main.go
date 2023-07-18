@@ -32,43 +32,47 @@ func main() {
 	}
 	defer zapLogger.Sync()
 
+	// TracerProviders
+	appTracer := tracing.NewJaegerTracerProvider("application")
+	ginTracer := tracing.NewJaegerTracerProvider("http")
+	postgresTracer := tracing.NewJaegerTracerProvider("postgres")
+	mongodbTracer := tracing.NewJaegerTracerProvider("mongodb")
+
 	// Postgres Repositories
 	db, err := gorm.NewPostgresConnection(config.Postgres)
 	if err != nil {
 		panic(err)
 	}
-	userRepository := postgres.NewUserRepository(db)
-	videoPostRepository := postgres.NewVideoPostRepository(db)
+	userRepository := postgres.NewUserRepository(postgresTracer, db)
+	videoPostRepository := postgres.NewVideoPostRepository(postgresTracer, db)
 
 	// MongoDB Repositories
 	client, err := mongo.NewMongoDbConnection(config.MongoDB)
 	if err != nil {
 		panic(err)
 	}
-	videoCommentRepository := mongodb.NewVideoCommentRepository(client)
+	videoCommentRepository := mongodb.NewVideoCommentRepository(mongodbTracer, client)
 
 	// Helper Package
 	fileUploader := bucket.NewLocalUploader(config.BucketPath.Raw)
 	ffmpeg := convert.NewFfmpeg(config.BucketPath.Converted)
 
 	// Use Case
-	appTracer := tracing.NewJaegerTracerProvider("application")
 
-	registerUseCase := auth.NewRegisterUserUseCase(userRepository)
+	registerUseCase := auth.NewRegisterUserUseCase(appTracer, userRepository)
 	loginUseCase := auth.NewLoginUseCase(appTracer, userRepository)
-	uploadVideoUseCase := createVideo.NewUploadVideoUseCase(fileUploader, ffmpeg)
-	createVideoUseCase := createVideo.NewCreateVideoUseCase(videoPostRepository, userRepository)
-	createCommentUseCase := comment.NewCreateCommentUseCase(videoCommentRepository, userRepository, videoPostRepository)
-	findCommentByVideoUseCase := comment.NewFindByVideoUseCase(videoCommentRepository)
-	deleteCommentUseCase := comment.NewDeleteCommentUseCase(videoCommentRepository)
-	forceDeleteCommentUseCase := comment.NewForceDeleteCommentUseCase(videoCommentRepository)
+	uploadVideoUseCase := createVideo.NewUploadVideoUseCase(appTracer, fileUploader, ffmpeg)
+	createVideoUseCase := createVideo.NewCreateVideoUseCase(appTracer, videoPostRepository, userRepository)
+	createCommentUseCase := comment.NewCreateCommentUseCase(appTracer, videoCommentRepository, userRepository, videoPostRepository)
+	findCommentByVideoUseCase := comment.NewFindByVideoUseCase(appTracer, videoCommentRepository)
+	deleteCommentUseCase := comment.NewDeleteCommentUseCase(appTracer, videoCommentRepository)
+	forceDeleteCommentUseCase := comment.NewForceDeleteCommentUseCase(appTracer, videoCommentRepository)
 
 	// HTTP Server
-	ginTracer := tracing.NewJaegerTracerProvider("http")
 
-	authController := controller.NewAuthenticationController(registerUseCase, loginUseCase, ginTracer)
-	videoController := controller.NewVideoController(uploadVideoUseCase, createVideoUseCase)
-	commentController := controller.NewCommentController(createCommentUseCase, findCommentByVideoUseCase, deleteCommentUseCase, forceDeleteCommentUseCase)
+	authController := controller.NewAuthenticationController(ginTracer, registerUseCase, loginUseCase)
+	videoController := controller.NewVideoController(ginTracer, uploadVideoUseCase, createVideoUseCase)
+	commentController := controller.NewCommentController(ginTracer, createCommentUseCase, findCommentByVideoUseCase, deleteCommentUseCase, forceDeleteCommentUseCase)
 
 	httpPort := fmt.Sprintf(":%d", config.Http.Port)
 	err = http.
