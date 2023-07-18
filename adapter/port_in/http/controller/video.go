@@ -29,6 +29,14 @@ func NewVideoController(tracerProvider *trace.TracerProvider, upload video.IUplo
 	}
 }
 
+//		@Summary					Upload video.
+//		@Tags						video
+//		@Accept						json
+//		@Produce					json
+//		@Param						request	body		video.UploadVideoCommand	true	"request body"
+//		@Success					200		{object}	video.UploadVideoResponse
+//		@Router						/video/api/v1/video/upload [post]
+//	 @Security BearerAuth
 func (v VideoController) Upload(ctx *gin.Context) {
 	newCtx, span := tracing.HttpSpanFactory(v.TracerProvider, ctx, pkg)
 	defer span.End()
@@ -66,6 +74,14 @@ func (v VideoController) Upload(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, res.Success(response))
 }
 
+//		@Summary					Create video post. This API is called after the video upload. Should bring the uploaded video uuid in the request.
+//		@Tags						video
+//		@Accept						json
+//		@Produce					json
+//		@Param						request	body		video.CreateVideoCommand	true	"request body"
+//		@Success					200		{object}	video.CreateVideoResponse
+//		@Router						/video/api/v1/create [post]
+//	 @Security BearerAuth
 func (v VideoController) Create(ctx *gin.Context) {
 	newCtx, span := tracing.HttpSpanFactory(v.TracerProvider, ctx, pkg)
 	defer span.End()

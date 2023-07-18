@@ -28,14 +28,12 @@ func NewAuthenticationController(tracerProvider *trace.TracerProvider, registerU
 	}
 }
 
-// Register
-//
 //		@Summary					Register new user.
 //		@Tags						auth
 //		@Accept						json
 //		@Produce					json
-//		@Param						request	body		register.RegisterUserCommand	true	"request format"
-//		@Success					200		{object}	register.RegisterUserResponse
+//		@Param						request	body		auth.RegisterUserCommand	true	"request format"
+//		@Success					200		{object}	auth.RegisterUserResponse
 //		@Router						/v1/auth/register [post]
 //	 @Security BearerAuth
 func (a AuthenticationController) Register(ctx *gin.Context) {
@@ -60,14 +58,12 @@ func (a AuthenticationController) Register(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, res.Success(response))
 }
 
-// Login
-//
 //		@Summary					Login and get token.
 //		@Tags						auth
 //		@Accept						json
 //		@Produce					json
-//		@Param						request	body		login.RegisterUserCommand	true	"request format"
-//		@Success					200		{object}	login.RegisterUserResponse
+//		@Param						request	body		auth.RegisterUserCommand	true	"request format"
+//		@Success					200		{object}	auth.RegisterUserResponse
 //		@Router						/v1/auth/login [post]
 //	 @Security BearerAuth
 func (a AuthenticationController) Login(ctx *gin.Context) {

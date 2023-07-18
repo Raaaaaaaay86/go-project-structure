@@ -10,10 +10,7 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {
-            "name": "Ray Lin",
-            "email": "raylincontact@icloud.com"
-        },
+        "contact": {},
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -43,7 +40,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/login.Command"
+                            "$ref": "#/definitions/auth.RegisterUserCommand"
                         }
                     }
                 ],
@@ -51,7 +48,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/login.Response"
+                            "$ref": "#/definitions/auth.RegisterUserResponse"
                         }
                     }
                 }
@@ -81,7 +78,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/register.Command"
+                            "$ref": "#/definitions/auth.RegisterUserCommand"
                         }
                     }
                 ],
@@ -89,7 +86,226 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/register.Response"
+                            "$ref": "#/definitions/auth.RegisterUserResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/video/api/v1/comment/admin/delete": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "Force delete comment by admin role",
+                "parameters": [
+                    {
+                        "description": "request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/comment.ForceDeleteCommentCommand"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/comment.ForceDeleteCommentResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/video/api/v1/comment/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "Create comment.",
+                "parameters": [
+                    {
+                        "description": "request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/comment.CreateCommentCommand"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/comment.CreateCommentResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/video/api/v1/comment/delete": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "Delete comment by normal user",
+                "parameters": [
+                    {
+                        "description": "request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/comment.DeleteCommentCommand"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/comment.DeleteCommentResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/video/api/v1/comment/find": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "comment"
+                ],
+                "summary": "Find comments by video id.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "videoId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/comment.FindByVideoResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/video/api/v1/create": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "video"
+                ],
+                "summary": "Create video post. This API is called after the video upload. Should bring the uploaded video uuid in the request.",
+                "parameters": [
+                    {
+                        "description": "request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/video.CreateVideoCommand"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/video.CreateVideoResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/video/api/v1/video/upload": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "video"
+                ],
+                "summary": "Upload video.",
+                "parameters": [
+                    {
+                        "description": "request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/video.UploadVideoCommand"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/video.UploadVideoResponse"
                         }
                     }
                 }
@@ -97,28 +313,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "login.Command": {
-            "type": "object",
-            "properties": {
-                "password": {
-                    "type": "string",
-                    "example": "password"
-                },
-                "username": {
-                    "type": "string",
-                    "example": "username01"
-                }
-            }
-        },
-        "login.Response": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                }
-            }
-        },
-        "register.Command": {
+        "auth.RegisterUserCommand": {
             "type": "object",
             "properties": {
                 "email": {
@@ -135,7 +330,7 @@ const docTemplate = `{
                 }
             }
         },
-        "register.Response": {
+        "auth.RegisterUserResponse": {
             "type": "object",
             "properties": {
                 "id": {
@@ -145,25 +340,134 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        }
-    },
-    "securityDefinitions": {
-        "BearerAuth": {
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header"
+        },
+        "comment.CreateCommentCommand": {
+            "type": "object",
+            "properties": {
+                "comment": {
+                    "type": "string"
+                },
+                "videoId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "comment.CreateCommentResponse": {
+            "type": "object",
+            "properties": {
+                "commend_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "comment.DeleteCommentCommand": {
+            "type": "object",
+            "properties": {
+                "commentId": {
+                    "type": "string"
+                }
+            }
+        },
+        "comment.DeleteCommentResponse": {
+            "type": "object"
+        },
+        "comment.FindByVideoResponse": {
+            "type": "object",
+            "properties": {
+                "comments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entity.VideoComment"
+                    }
+                }
+            }
+        },
+        "comment.ForceDeleteCommentCommand": {
+            "type": "object",
+            "properties": {
+                "commentId": {
+                    "type": "string"
+                }
+            }
+        },
+        "comment.ForceDeleteCommentResponse": {
+            "type": "object",
+            "properties": {
+                "deleteCount": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entity.VideoComment": {
+            "type": "object",
+            "properties": {
+                "author_id": {
+                    "type": "integer"
+                },
+                "comment": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "videoId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "video.CreateVideoCommand": {
+            "type": "object",
+            "properties": {
+                "authorId": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "video.CreateVideoResponse": {
+            "type": "object"
+        },
+        "video.UploadVideoCommand": {
+            "type": "object",
+            "properties": {
+                "uploaderId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "video.UploadVideoResponse": {
+            "type": "object",
+            "properties": {
+                "uuid": {
+                    "type": "string"
+                }
+            }
         }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0",
-	Host:             "localhost:8080/video/api",
+	Version:          "",
+	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Video Service",
-	Description:      "This is a demo of Go project structure and others tech stack usage.",
+	Title:            "",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

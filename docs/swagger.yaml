@@ -1,19 +1,5 @@
 definitions:
-  login.Command:
-    properties:
-      password:
-        example: password
-        type: string
-      username:
-        example: username01
-        type: string
-    type: object
-  login.Response:
-    properties:
-      token:
-        type: string
-    type: object
-  register.Command:
+  auth.RegisterUserCommand:
     properties:
       email:
         example: example@gmail.com
@@ -25,21 +11,89 @@ definitions:
         example: username01
         type: string
     type: object
-  register.Response:
+  auth.RegisterUserResponse:
     properties:
       id:
         type: integer
       username:
         type: string
     type: object
-host: localhost:8080/video/api
+  comment.CreateCommentCommand:
+    properties:
+      comment:
+        type: string
+      videoId:
+        type: integer
+    type: object
+  comment.CreateCommentResponse:
+    properties:
+      commend_id:
+        type: string
+    type: object
+  comment.DeleteCommentCommand:
+    properties:
+      commentId:
+        type: string
+    type: object
+  comment.DeleteCommentResponse:
+    type: object
+  comment.FindByVideoResponse:
+    properties:
+      comments:
+        items:
+          $ref: '#/definitions/entity.VideoComment'
+        type: array
+    type: object
+  comment.ForceDeleteCommentCommand:
+    properties:
+      commentId:
+        type: string
+    type: object
+  comment.ForceDeleteCommentResponse:
+    properties:
+      deleteCount:
+        type: integer
+    type: object
+  entity.VideoComment:
+    properties:
+      author_id:
+        type: integer
+      comment:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      updatedAt:
+        type: string
+      videoId:
+        type: integer
+    type: object
+  video.CreateVideoCommand:
+    properties:
+      authorId:
+        type: integer
+      description:
+        type: string
+      title:
+        type: string
+      uuid:
+        type: string
+    type: object
+  video.CreateVideoResponse:
+    type: object
+  video.UploadVideoCommand:
+    properties:
+      uploaderId:
+        type: integer
+    type: object
+  video.UploadVideoResponse:
+    properties:
+      uuid:
+        type: string
+    type: object
 info:
-  contact:
-    email: raylincontact@icloud.com
-    name: Ray Lin
-  description: This is a demo of Go project structure and others tech stack usage.
-  title: Video Service
-  version: "1.0"
+  contact: {}
 paths:
   /v1/auth/login:
     post:
@@ -51,14 +105,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/login.Command'
+          $ref: '#/definitions/auth.RegisterUserCommand'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/login.Response'
+            $ref: '#/definitions/auth.RegisterUserResponse'
       security:
       - BearerAuth: []
       summary: Login and get token.
@@ -74,22 +128,151 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/register.Command'
+          $ref: '#/definitions/auth.RegisterUserCommand'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/register.Response'
+            $ref: '#/definitions/auth.RegisterUserResponse'
       security:
       - BearerAuth: []
       summary: Register new user.
       tags:
       - auth
-securityDefinitions:
-  BearerAuth:
-    in: header
-    name: Authorization
-    type: apiKey
+  /video/api/v1/comment/admin/delete:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/comment.ForceDeleteCommentCommand'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/comment.ForceDeleteCommentResponse'
+      security:
+      - BearerAuth: []
+      summary: Force delete comment by admin role
+      tags:
+      - comment
+  /video/api/v1/comment/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/comment.CreateCommentCommand'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/comment.CreateCommentResponse'
+      security:
+      - BearerAuth: []
+      summary: Create comment.
+      tags:
+      - comment
+  /video/api/v1/comment/delete:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/comment.DeleteCommentCommand'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/comment.DeleteCommentResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete comment by normal user
+      tags:
+      - comment
+  /video/api/v1/comment/find:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: videoId
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/comment.FindByVideoResponse'
+      summary: Find comments by video id.
+      tags:
+      - comment
+  /video/api/v1/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/video.CreateVideoCommand'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/video.CreateVideoResponse'
+      security:
+      - BearerAuth: []
+      summary: Create video post. This API is called after the video upload. Should
+        bring the uploaded video uuid in the request.
+      tags:
+      - video
+  /video/api/v1/video/upload:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/video.UploadVideoCommand'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/video.UploadVideoResponse'
+      security:
+      - BearerAuth: []
+      summary: Upload video.
+      tags:
+      - video
 swagger: "2.0"

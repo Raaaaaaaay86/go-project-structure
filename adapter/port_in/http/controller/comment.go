@@ -36,6 +36,14 @@ func NewCommentController(tracerProvider *trace.TracerProvider, createCommentUse
 	}
 }
 
+//		@Summary					Create comment.
+//		@Tags						comment
+//		@Accept						json
+//		@Produce					json
+//		@Param						request	body		comment.CreateCommentCommand	true	"request body"
+//		@Success					200		{object}	comment.CreateCommentResponse
+//		@Router						/video/api/v1/comment/create [post]
+//	 @Security BearerAuth
 func (c CommentController) Create(ctx *gin.Context) {
 	newCtx, span := tracing.HttpSpanFactory(c.TracerProvider, ctx, pkg)
 	defer span.End()
@@ -67,6 +75,13 @@ func (c CommentController) Create(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, res.Success(response))
 }
 
+// @Summary					Find comments by video id.
+// @Tags						comment
+// @Accept						json
+// @Produce					json
+// @Param						request	query		comment.FindByVideoQuery	true	"request body"
+// @Success					200		{object}	comment.FindByVideoResponse
+// @Router						/video/api/v1/comment/find [get]
 func (c CommentController) Find(ctx *gin.Context) {
 	newCtx, span := tracing.HttpSpanFactory(c.TracerProvider, ctx, pkg)
 	defer span.End()
@@ -89,6 +104,14 @@ func (c CommentController) Find(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res.Success(response))
 }
 
+//		@Summary					Delete comment by normal user
+//		@Tags						comment
+//		@Accept						json
+//		@Produce					json
+//		@Param						request	body		comment.DeleteCommentCommand	true	"request body"
+//		@Success					200		{object}	comment.DeleteCommentResponse
+//		@Router						/video/api/v1/comment/delete [delete]
+//	 @Security BearerAuth
 func (c CommentController) UserDelete(ctx *gin.Context) {
 	newCtx, span := tracing.HttpSpanFactory(c.TracerProvider, ctx, pkg)
 	defer span.End()
@@ -122,6 +145,14 @@ func (c CommentController) UserDelete(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res.Success(response))
 }
 
+//		@Summary					Force delete comment by admin role
+//		@Tags						comment
+//		@Accept						json
+//		@Produce					json
+//		@Param						request	body		comment.ForceDeleteCommentCommand	true	"request body"
+//		@Success					200		{object}	comment.ForceDeleteCommentResponse
+//		@Router						/video/api/v1/comment/admin/delete [delete]
+//	 @Security BearerAuth
 func (c CommentController) ForceDelete(ctx *gin.Context) {
 	newCtx, span := tracing.HttpSpanFactory(c.TracerProvider, ctx, pkg)
 	defer span.End()
