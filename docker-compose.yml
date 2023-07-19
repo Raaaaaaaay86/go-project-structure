@@ -30,6 +30,18 @@ services:
       - "27017:27017"
     command: ["--keyFile", "/data/mongo-replica.key", "--replSet", "dbrs", "--bind_ip_all"]
 
+  neo4j:
+    container_name: video-graphdb
+    image: neo4j
+    restart: always
+    volumes:
+      - video-neo4j-data:/data
+    environment:
+      - NEO4J_AUTH=neo4j/12345678
+    ports:
+      - "7475:7474"
+      - "7688:7687"
+
   jaeger:
     image: jaegertracing/all-in-one:1.47
     environment:
@@ -50,3 +62,4 @@ services:
 volumes:
   video-postgres-data:
   video-mongo-data:
+  video-neo4j-data:
