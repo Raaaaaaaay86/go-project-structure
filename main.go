@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"github.com/raaaaaaaay86/go-project-structure/adapter/port_in/http"
 	"github.com/raaaaaaaay86/go-project-structure/adapter/port_in/http/controller"
-	mongodb "github.com/raaaaaaaay86/go-project-structure/adapter/port_out/mongo"
-	"github.com/raaaaaaaay86/go-project-structure/adapter/port_out/postgres"
+	mongodb "github.com/raaaaaaaay86/go-project-structure/adapter/port_out/repository"
 	_ "github.com/raaaaaaaay86/go-project-structure/docs" //nolint:typecheck
 	"github.com/raaaaaaaay86/go-project-structure/domain/context/auth"
 	"github.com/raaaaaaaay86/go-project-structure/domain/context/media/comment"
@@ -35,23 +34,22 @@ func main() {
 	// TracerProviders
 	appTracer := tracing.NewJaegerTracerProvider("application")
 	ginTracer := tracing.NewJaegerTracerProvider("http")
-	postgresTracer := tracing.NewJaegerTracerProvider("postgres")
-	mongodbTracer := tracing.NewJaegerTracerProvider("mongodb")
+	repositoryTracer := tracing.NewJaegerTracerProvider("repository")
 
 	// Postgres Repositories
 	db, err := gorm.NewPostgresConnection(config.Postgres)
 	if err != nil {
 		panic(err)
 	}
-	userRepository := postgres.NewUserRepository(postgresTracer, db)
-	videoPostRepository := postgres.NewVideoPostRepository(postgresTracer, db)
+	userRepository := mongodb.NewUserRepository(repositoryTracer, db)
+	videoPostRepository := mongodb.NewVideoPostRepository(repositoryTracer, db)
 
 	// MongoDB Repositories
 	client, err := mongo.NewMongoDbConnection(config.MongoDB)
 	if err != nil {
 		panic(err)
 	}
-	videoCommentRepository := mongodb.NewVideoCommentRepository(mongodbTracer, client)
+	videoCommentRepository := mongodb.NewVideoCommentRepository(repositoryTracer, client)
 
 	// Helper Package
 	fileUploader := bucket.NewLocalUploader(config.BucketPath.Raw)
