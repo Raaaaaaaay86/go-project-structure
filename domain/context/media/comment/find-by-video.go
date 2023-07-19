@@ -25,24 +25,24 @@ type FindByVideoResponse struct {
 	Comments []*entity.VideoComment `json:"comments"`
 }
 
-type IFindByVideoCQRS interface {
+type IFindByVideoUseCase interface {
 	Execute(ctx context.Context, query FindByVideoQuery) (*FindByVideoResponse, error)
 }
 
-type FindByVideoCQRS struct {
+type FindByVideoUseCase struct {
 	VideoCommentRepository repository.VideoCommentRepository
 	TracerProvider         *trace.TracerProvider
 }
 
-func NewFindByVideoUseCase(tracerProvider *trace.TracerProvider, videoCommentRepository repository.VideoCommentRepository) *FindByVideoCQRS {
-	return &FindByVideoCQRS{
+func NewFindByVideoUseCase(tracerProvider *trace.TracerProvider, videoCommentRepository repository.VideoCommentRepository) *FindByVideoUseCase {
+	return &FindByVideoUseCase{
 		VideoCommentRepository: videoCommentRepository,
 		TracerProvider:         tracerProvider,
 	}
 }
 
-func (f FindByVideoCQRS) Execute(ctx context.Context, query FindByVideoQuery) (*FindByVideoResponse, error) {
-	newCtx, span := tracing.ApplicationSpanFactory(f.TracerProvider, ctx, pkg, "FindByVideoCQRS.Execute")
+func (f FindByVideoUseCase) Execute(ctx context.Context, query FindByVideoQuery) (*FindByVideoResponse, error) {
+	newCtx, span := tracing.ApplicationSpanFactory(f.TracerProvider, ctx, pkg, "FindByVideoUseCase.Execute")
 	defer span.End()
 
 	err := validate.Do(query)

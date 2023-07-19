@@ -20,13 +20,13 @@ type ICommentController interface {
 
 type CommentController struct {
 	CreateUseCase              comment.IVideoCommentCreateUseCase
-	FindByVideoIdUseCase       comment.IFindByVideoCQRS
+	FindByVideoIdUseCase       comment.IFindByVideoUseCase
 	DeleteCommentUseCase       comment.IDeleteCommentUseCase
 	ForceDeleteCommentUserCase comment.IForceDeleteCommentUseCase
 	TracerProvider             *trace.TracerProvider
 }
 
-func NewCommentController(tracerProvider *trace.TracerProvider, createCommentUseCase comment.IVideoCommentCreateUseCase, findByVideoUseCase comment.IFindByVideoCQRS, deleteCommentUseCase comment.IDeleteCommentUseCase, forceDeleteUseCase comment.IForceDeleteCommentUseCase) *CommentController {
+func NewCommentController(tracerProvider *trace.TracerProvider, createCommentUseCase comment.IVideoCommentCreateUseCase, findByVideoUseCase comment.IFindByVideoUseCase, deleteCommentUseCase comment.IDeleteCommentUseCase, forceDeleteUseCase comment.IForceDeleteCommentUseCase) *CommentController {
 	return &CommentController{
 		CreateUseCase:              createCommentUseCase,
 		FindByVideoIdUseCase:       findByVideoUseCase,
