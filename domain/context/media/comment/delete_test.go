@@ -21,12 +21,12 @@ func TestDeleteCommentUseCase_Execute(t *testing.T) {
 		ExecutorId      uint
 		RoleIds         []role.RoleId
 		ExpectedError   error
-		Description     string
+		TestDescription string
 	}
 
 	testCases := []DeleteCommentTestCase{
 		{
-			Description:     "Delete comment by author",
+			TestDescription: "Delete comment by author",
 			CommentId:       primitive.NewObjectID(),
 			CommentAuthorId: 1,
 			ExecutorId:      1,
@@ -34,7 +34,7 @@ func TestDeleteCommentUseCase_Execute(t *testing.T) {
 			ExpectedError:   nil,
 		},
 		{
-			Description:     "Comment cannot deleted by non-author USER role",
+			TestDescription: "Comment cannot deleted by non-author USER role",
 			CommentId:       primitive.NewObjectID(),
 			CommentAuthorId: 2,
 			ExecutorId:      1,
@@ -42,7 +42,7 @@ func TestDeleteCommentUseCase_Execute(t *testing.T) {
 			ExpectedError:   exception.ErrUnauthorized,
 		},
 		{
-			Description:     "Delete a non-exists comment",
+			TestDescription: "Delete a non-exists comment",
 			CommentId:       [12]byte{9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
 			CommentAuthorId: 0,
 			ExecutorId:      1,
@@ -52,7 +52,7 @@ func TestDeleteCommentUseCase_Execute(t *testing.T) {
 	}
 
 	for i, tc := range testCases {
-		t.Logf("Test case [%d]", i)
+		t.Logf("Test case [%d] - %s", i, tc.TestDescription)
 
 		videoCommentRepository := mocks.NewVideoCommentRepository(t)
 		switch tc.ExpectedError {

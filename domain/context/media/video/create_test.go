@@ -14,44 +14,50 @@ import (
 
 func TestVideoCreateCQRS_Execute(t *testing.T) {
 	type VideoCreateTestCase struct {
-		Title         string
-		Description   string
-		VideoUUID     string
-		Author        entity.User
-		ExpectedError error
+		TestDescription string
+		Title           string
+		Description     string
+		VideoUUID       string
+		Author          entity.User
+		ExpectedError   error
 	}
 
 	testCases := []VideoCreateTestCase{
 		{
-			Title:       "test title",
-			Description: "test description",
-			VideoUUID:   "test uuid",
+			TestDescription: "Success create video",
+			Title:           "test title",
+			Description:     "test description",
+			VideoUUID:       "test uuid",
 			Author: entity.User{
 				Id: 1,
 			},
 			ExpectedError: nil,
 		},
 		{
-			Title:       "test title",
-			Description: "test description",
-			VideoUUID:   "",
+			TestDescription: "Failed by empty video UUID",
+			Title:           "test title",
+			Description:     "test description",
+			VideoUUID:       "",
 			Author: entity.User{
 				Id: 1,
 			},
 			ExpectedError: exception.ErrEmptyInput,
 		},
 		{
-			Title:       "test title",
-			Description: "",
-			VideoUUID:   "test uuid",
+			TestDescription: "Success to create with empty description",
+			Title:           "test title",
+			Description:     "",
+			VideoUUID:       "test uuid",
 			Author: entity.User{
 				Id: 1,
 			},
+			ExpectedError: nil,
 		},
 		{
-			Title:       "",
-			Description: "test description",
-			VideoUUID:   "test uuid",
+			TestDescription: "Failed by empty title",
+			Title:           "",
+			Description:     "test description",
+			VideoUUID:       "test uuid",
 			Author: entity.User{
 				Id: 1,
 			},
@@ -60,7 +66,7 @@ func TestVideoCreateCQRS_Execute(t *testing.T) {
 	}
 
 	for i, tc := range testCases {
-		t.Logf("Start Test case[%d]", i)
+		t.Logf("Start Test case[%d] - %s", i, tc.TestDescription)
 
 		cmd := video.CreateVideoCommand{
 			Title:       tc.Title,

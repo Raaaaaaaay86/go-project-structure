@@ -16,11 +16,12 @@ import (
 	"testing"
 )
 
-func TestVideoUploadCQRS_Execute(t *testing.T) {
+func TestVideoUploadUseCase_Execute(t *testing.T) {
 	type VideoUploadTestCase struct {
-		File        io.Reader
-		FileName    string
-		ExpectedErr error
+		TestDescription string
+		File            io.Reader
+		FileName        string
+		ExpectedErr     error
 	}
 
 	createTempFile := func() *os.File {
@@ -46,24 +47,27 @@ func TestVideoUploadCQRS_Execute(t *testing.T) {
 
 	testCases := []VideoUploadTestCase{
 		{
-			File:        nil,
-			FileName:    "hello.mp4",
-			ExpectedErr: exception.ErrEmptyFile,
+			TestDescription: "Failed by empty file",
+			File:            nil,
+			FileName:        "hello.mp4",
+			ExpectedErr:     exception.ErrEmptyFile,
 		},
 		{
-			File:        createTempFile(),
-			FileName:    "",
-			ExpectedErr: exception.ErrEmptyInput,
+			TestDescription: "Failed by empty file name",
+			File:            createTempFile(),
+			FileName:        "",
+			ExpectedErr:     exception.ErrEmptyInput,
 		},
 		{
-			File:        createTempFile(),
-			FileName:    "world.mp4",
-			ExpectedErr: nil,
+			TestDescription: "Success to upload video",
+			File:            createTempFile(),
+			FileName:        "world.mp4",
+			ExpectedErr:     nil,
 		},
 	}
 
 	for i, tc := range testCases {
-		t.Logf("Start Test case[%d]", i)
+		t.Logf("Start Test case[%d] - %s", i, tc.TestDescription)
 
 		cmd := video.UploadVideoCommand{
 			File:     tc.File,

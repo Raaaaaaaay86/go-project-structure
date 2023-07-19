@@ -15,7 +15,7 @@ import (
 
 func TestFindByVideoCQRS_Execute(t *testing.T) {
 	type FindCommentByVideoTestCase struct {
-		Description      string
+		TestDescription  string
 		VideoId          uint
 		ExpectedComments []*entity.VideoComment
 		ExpectedError    error
@@ -23,8 +23,8 @@ func TestFindByVideoCQRS_Execute(t *testing.T) {
 
 	testCases := []FindCommentByVideoTestCase{
 		{
-			Description: "Video has comments",
-			VideoId:     1,
+			TestDescription: "Video has comments",
+			VideoId:         1,
 			ExpectedComments: []*entity.VideoComment{
 				{Id: primitive.NewObjectID()},
 				{Id: primitive.NewObjectID()},
@@ -33,8 +33,8 @@ func TestFindByVideoCQRS_Execute(t *testing.T) {
 			ExpectedError: nil,
 		},
 		{
-			Description: "Video has no comments",
-			VideoId:     1,
+			TestDescription: "Video has no comments",
+			VideoId:         1,
 			ExpectedComments: []*entity.VideoComment{
 				{Id: primitive.NewObjectID()},
 				{Id: primitive.NewObjectID()},
@@ -43,14 +43,14 @@ func TestFindByVideoCQRS_Execute(t *testing.T) {
 			ExpectedError: nil,
 		},
 		{
-			Description:   "Request by empty VideoId",
-			VideoId:       0,
-			ExpectedError: exception.ErrEmptyInput,
+			TestDescription: "Request by empty VideoId",
+			VideoId:         0,
+			ExpectedError:   exception.ErrEmptyInput,
 		},
 	}
 
 	for i, tc := range testCases {
-		t.Logf("Test case [%d]", i)
+		t.Logf("Test case [%d] - %s", i, tc.TestDescription)
 
 		videoCommentRepository := mocks.NewVideoCommentRepository(t)
 		switch tc.ExpectedError {

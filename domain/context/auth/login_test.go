@@ -18,6 +18,7 @@ import (
 
 func TestLoginCQRS_Execute(t *testing.T) {
 	type LoginTestCase struct {
+		TestDescription   string
 		Username          string
 		DecryptedPassword vo.DecryptedPassword
 		UserRole          role.RoleId
@@ -26,44 +27,48 @@ func TestLoginCQRS_Execute(t *testing.T) {
 
 	testCases := []LoginTestCase{
 		{
+			TestDescription:   "Failed by empty password",
 			Username:          "user01",
 			DecryptedPassword: "",
 			UserRole:          role.User,
 			ExpectedErr:       exception.ErrEmptyInput,
 		},
 		{
+			TestDescription:   "Failed by empty username",
 			Username:          "",
-			DecryptedPassword: "anypassword",
+			DecryptedPassword: "correctPassword",
 			UserRole:          role.User,
 			ExpectedErr:       exception.ErrEmptyInput,
 		},
 		{
-			Username:          "user01",
-			DecryptedPassword: "user01secret",
-			UserRole:          role.User,
-			ExpectedErr:       nil,
-		},
-		{
+			TestDescription:   "Failed by wrong password",
 			Username:          "user01",
 			DecryptedPassword: "wrongPassword",
 			UserRole:          role.User,
 			ExpectedErr:       exception.ErrWrongPassword,
 		},
+		{
+			TestDescription:   "Success Login",
+			Username:          "user01",
+			DecryptedPassword: "correctPassword",
+			UserRole:          role.User,
+			ExpectedErr:       nil,
+		},
 	}
 
-	for i, testcase := range testCases {
-		t.Logf("Start Test case[%d]", i)
+	for i, tc := range testCases {
+		t.Logf("Start Test case[%d] - %s", i, tc.TestDescription)
 
 		cmd := auth.LoginUserCommand{
-			Username:          testcase.Username,
-			DecryptedPassword: testcase.DecryptedPassword,
+			Username:          tc.Username,
+			DecryptedPassword: tc.DecryptedPassword,
 		}
 
 		ctx := context.Background()
 		userRepository := mocks.NewUserRepository(t)
 		userRepository.On("WithPreload").Return(userRepository).Maybe()
-		expectedUser := entity.NewUser(cmd.Username, cmd.DecryptedPassword.Encrypt(), mock.Anything, *(entity.NewRole(testcase.UserRole)))
-		switch testcase.ExpectedErr {
+		expectedUser := entity.NewUser(cmd.Username, vo.DecryptedPassword("correctPassword").Encrypt(), mock.Anything, *(entity.NewRole(tc.UserRole)))
+		switch tc.ExpectedErr {
 		case nil, exception.ErrWrongPassword:
 			userRepository.On("FindByUsername", mock.Anything, cmd.Username).Return(expectedUser, nil).Once()
 		case exception.ErrUserNotFound:
@@ -73,8 +78,8 @@ func TestLoginCQRS_Execute(t *testing.T) {
 
 		tracer := tracing.NewEmptyTracerProvider()
 		response, err := auth.NewLoginUseCase(tracer, userRepository).Execute(ctx, cmd)
-		if err != nil {
-			assert.ErrorIs(t, testcase.ExpectedErr, err)
+		if err != nil || tc.ExpectedErr != nil {
+			assert.ErrorIs(t, tc.ExpectedErr, err)
 			continue
 		}
 

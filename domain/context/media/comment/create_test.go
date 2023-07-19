@@ -15,41 +15,46 @@ import (
 
 func TestCreateCommentUseCase_Execute(t *testing.T) {
 	type CreateCommentUseCase struct {
-		AuthorId      uint
-		VideoId       uint
-		Comment       string
-		ExpectedError error
+		TestDescription string
+		AuthorId        uint
+		VideoId         uint
+		Comment         string
+		ExpectedError   error
 	}
 
 	testCases := []CreateCommentUseCase{
 		{
-			AuthorId:      1,
-			VideoId:       1,
-			Comment:       "test comment",
-			ExpectedError: nil,
+			TestDescription: "Success create comment",
+			AuthorId:        1,
+			VideoId:         1,
+			Comment:         "test comment",
+			ExpectedError:   nil,
 		},
 		{
-			AuthorId:      1,
-			VideoId:       1,
-			Comment:       "",
-			ExpectedError: exception.ErrEmptyInput,
+			TestDescription: "Failed by empty comment",
+			AuthorId:        1,
+			VideoId:         1,
+			Comment:         "",
+			ExpectedError:   exception.ErrEmptyInput,
 		},
 		{
-			AuthorId:      1,
-			VideoId:       1,
-			Comment:       "test comment",
-			ExpectedError: gorm.ErrRecordNotFound,
+			TestDescription: "Failed by non-exist author (user id)",
+			AuthorId:        999,
+			VideoId:         1,
+			Comment:         "test comment",
+			ExpectedError:   gorm.ErrRecordNotFound,
 		},
 		{
-			AuthorId:      1,
-			VideoId:       1,
-			Comment:       "test comment",
-			ExpectedError: gorm.ErrRecordNotFound,
+			TestDescription: "Failed by non-exist video post (video id)",
+			AuthorId:        1,
+			VideoId:         999,
+			Comment:         "test comment",
+			ExpectedError:   gorm.ErrRecordNotFound,
 		},
 	}
 
 	for i, tc := range testCases {
-		t.Logf("Start Test case[%d]", i)
+		t.Logf("Start Test case[%d] - %s", i, tc.TestDescription)
 
 		userRepository := mocks.NewUserRepository(t)
 		videoPostRepository := mocks.NewVideoPostRepository(t)

@@ -16,6 +16,7 @@ import (
 
 func TestRegisterUseCase_Execute(t *testing.T) {
 	type RegisterTestCase struct {
+		TestDescription   string
 		Username          string
 		RoleId            role.RoleId
 		DecryptedPassword vo.DecryptedPassword
@@ -28,27 +29,37 @@ func TestRegisterUseCase_Execute(t *testing.T) {
 
 	testCases := []RegisterTestCase{
 		{
+			TestDescription:   "Success Register",
 			Username:          "user01",
-			DecryptedPassword: "user01secret",
+			DecryptedPassword: "correctPassword",
 			Email:             "user01@email.com",
 			ExceptedErr:       nil,
 		},
 		{
+			TestDescription:   "Failed by empty invalid email",
 			Username:          "user01",
-			DecryptedPassword: "user01secret",
+			DecryptedPassword: "correctPassword",
 			Email:             "user01email.com",
 			ExceptedErr:       exception.ErrInvalidEmail,
 		},
 		{
+			TestDescription:   "Failed by empty password",
 			Username:          "user01",
 			DecryptedPassword: "",
+			Email:             "user01@email.com",
+			ExceptedErr:       exception.ErrEmptyInput,
+		},
+		{
+			TestDescription:   "Failed by empty username",
+			Username:          "",
+			DecryptedPassword: "correctPassword",
 			Email:             "user01@email.com",
 			ExceptedErr:       exception.ErrEmptyInput,
 		},
 	}
 
 	for i, tc := range testCases {
-		t.Logf("Start Test case[%d]", i)
+		t.Logf("Start Test case[%d] - %s", i, tc.TestDescription)
 
 		cmd := r.RegisterUserCommand{
 			Username:          tc.Username,
@@ -68,7 +79,7 @@ func TestRegisterUseCase_Execute(t *testing.T) {
 		}
 
 		response, err := register.Execute(context.TODO(), cmd)
-		if err != nil {
+		if err != nil || tc.ExceptedErr != nil {
 			assert.ErrorIs(t, tc.ExceptedErr, err)
 			continue
 		}
