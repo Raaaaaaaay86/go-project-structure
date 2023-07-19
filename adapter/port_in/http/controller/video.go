@@ -13,19 +13,31 @@ import (
 type IVideoController interface {
 	Upload(ctx *gin.Context)
 	Create(ctx *gin.Context)
+	LikeVideo(ctx *gin.Context)
+	UnLikeVideo(ctx *gin.Context)
 }
 
 type VideoController struct {
 	UploadVideoUseCase video.IUploadVideoUseCase
 	CreateVideoUseCase video.IVideoCreateUseCase
+	LikeVideoUseCase   video.ILikeVideoUseCase
+	UnLikeVideoUseCase video.IUnLikeVideoUseCase
 	TracerProvider     *trace.TracerProvider
 }
 
-func NewVideoController(tracerProvider *trace.TracerProvider, upload video.IUploadVideoUseCase, create video.IVideoCreateUseCase) *VideoController {
+func NewVideoController(
+	tracerProvider *trace.TracerProvider,
+	upload video.IUploadVideoUseCase,
+	create video.IVideoCreateUseCase,
+	like video.ILikeVideoUseCase,
+	unlike video.IUnLikeVideoUseCase,
+) *VideoController {
 	return &VideoController{
 		UploadVideoUseCase: upload,
 		CreateVideoUseCase: create,
 		TracerProvider:     tracerProvider,
+		LikeVideoUseCase:   like,
+		UnLikeVideoUseCase: unlike,
 	}
 }
 
@@ -104,6 +116,60 @@ func (v VideoController) Create(ctx *gin.Context) {
 	response, err := v.CreateVideoUseCase.Execute(newCtx, cmd)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, res.Fail(err.Error(), "unable to create video post."))
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, res.Success(response))
+}
+
+func (v VideoController) LikeVideo(ctx *gin.Context) {
+	newCtx, span := tracing.HttpSpanFactory(v.TracerProvider, ctx, pkg)
+	defer span.End()
+
+	token, exists := ctx.Get("token")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, res.Fail("token is not found.", nil))
+		return
+	}
+
+	cmd := video.LikeVideoCommand{}
+	err := ctx.ShouldBindJSON(&cmd)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, res.Fail(err.Error(), "invalid request body."))
+		return
+	}
+	cmd.UserId = (token.(*jwt.CustomClaim)).Uid
+
+	response, err := v.LikeVideoUseCase.Execute(newCtx, cmd)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, res.Fail(err.Error(), "unable to like video."))
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, res.Success(response))
+}
+
+func (v VideoController) UnLikeVideo(ctx *gin.Context) {
+	newCtx, span := tracing.HttpSpanFactory(v.TracerProvider, ctx, pkg)
+	defer span.End()
+
+	token, exists := ctx.Get("token")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, res.Fail("token is not found.", nil))
+		return
+	}
+
+	cmd := video.UnLikeVideoCommand{}
+	err := ctx.ShouldBindJSON(&cmd)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, res.Fail(err.Error(), "invalid request body."))
+		return
+	}
+	cmd.UserId = (token.(*jwt.CustomClaim)).Uid
+
+	response, err := v.UnLikeVideoUseCase.Execute(newCtx, cmd)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, res.Fail(err.Error(), "unable to like video."))
 		return
 	}
 

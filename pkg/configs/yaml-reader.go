@@ -29,11 +29,18 @@ type BucketPath struct {
 	Converted string `yaml:"converted"`
 }
 
+type Neo4j struct {
+	Uri      string `yaml:"uri"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+}
+
 type YamlConfig struct {
 	Http       Http       `yaml:"http"`
 	Postgres   Postgres   `yaml:"postgres"`
 	BucketPath BucketPath `yaml:"bucketPath"`
 	MongoDB    Mongo      `yaml:"mongodb"`
+	Neo4j      Neo4j      `yaml:"neo4j"`
 }
 
 func ReadYaml(path string) (*YamlConfig, error) {

@@ -54,6 +54,8 @@ func setVideoRouter(parent *gin.RouterGroup, video controller.IVideoController) 
 	{
 		group.POST("/upload", video.Upload)
 		group.POST("/create", video.Create)
+		group.POST("/like", video.LikeVideo)
+		group.POST("/unlike", video.UnLikeVideo)
 	}
 }
 

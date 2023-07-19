@@ -9,10 +9,15 @@ postgres:
   schema: video
 
 mongodb:
-  host: localhost
+  host: mongo1
   port: 27017
   user: root
   password: 123456
+
+neo4j:
+  uri: neo4j://localhost:7688
+  user: neo4j
+  password: 12345678
 
 bucketPath:
   raw: /Users/linjiafu/project/go-video-demo/bucket

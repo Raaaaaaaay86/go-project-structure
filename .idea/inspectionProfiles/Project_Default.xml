@@ -17,6 +17,7 @@
         <method importPath="mime/multipart" receiver="File" name="Close" />
         <method importPath="os" receiver="*File" name="Close" />
         <method importPath="go.uber.org/zap" receiver="*SugaredLogger" name="Sync" />
+        <method importPath="github.com/neo4j/neo4j-go-driver/v5/neo4j" receiver="DriverWithContext" name="Close" />
       </methods>
     </inspection_tool>
   </profile>

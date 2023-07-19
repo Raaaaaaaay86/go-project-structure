@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
 	"github.com/raaaaaaaay86/go-project-structure/domain/repository"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
@@ -12,14 +13,62 @@ import (
 
 type VideoPostRepository struct {
 	DB             *gorm.DB
+	GraphDB        neo4j.DriverWithContext
 	TracerProvider *trace.TracerProvider
 }
 
-func NewVideoPostRepository(tracerProvider *trace.TracerProvider, DB *gorm.DB) *VideoPostRepository {
+func NewVideoPostRepository(tracerProvider *trace.TracerProvider, DB *gorm.DB, graphDB neo4j.DriverWithContext) *VideoPostRepository {
 	return &VideoPostRepository{
 		DB:             DB,
+		GraphDB:        graphDB,
 		TracerProvider: tracerProvider,
 	}
+}
+
+func (v VideoPostRepository) Like(ctx context.Context, videoId uint, userId uint) error {
+	session := v.GraphDB.NewSession(ctx, neo4j.SessionConfig{})
+
+	_, err := neo4j.ExecuteWrite(ctx, session, func(tx neo4j.ManagedTransaction) (interface{}, error) {
+		params := map[string]any{
+			"videoId": videoId,
+			"userId":  userId,
+		}
+
+		_, err := tx.Run(ctx, "MERGE (u:User{id:$userId}) MERGE (v:Video{id:$videoId}) MERGE (u)-[:LIKE]->(v)", params)
+		if err != nil {
+			return nil, err
+		}
+
+		return 1, nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (v VideoPostRepository) UnLike(ctx context.Context, videoId uint, userId uint) error {
+	session := v.GraphDB.NewSession(ctx, neo4j.SessionConfig{})
+
+	_, err := neo4j.ExecuteWrite(ctx, session, func(tx neo4j.ManagedTransaction) (interface{}, error) {
+		params := map[string]any{
+			"videoId": videoId,
+			"userId":  userId,
+		}
+
+		_, err := tx.Run(ctx, "MATCH (u:User{id:$userId})-[r:LIKE]->(v:Video{id:$videoId}) DELETE r", params)
+		if err != nil {
+			return nil, err
+		}
+
+		return 1, nil
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (v VideoPostRepository) ForUpdate() repository.VideoPostRepository {
