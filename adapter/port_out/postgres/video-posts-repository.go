@@ -22,31 +22,31 @@ func NewVideoPostRepository(tracerProvider *trace.TracerProvider, DB *gorm.DB) *
 	}
 }
 
-func (v VideoPostRepository) StartTx() *gorm.DB {
-	return v.DB.Begin()
-}
-
-func (v VideoPostRepository) CommitTx(tx *gorm.DB) *gorm.DB {
-	return tx.Commit()
-}
-
-func (v VideoPostRepository) WithTx(tx *gorm.DB) repository.VideoPostRepository {
-	v.DB = tx
-	return v
-}
-
 func (v VideoPostRepository) ForUpdate() repository.VideoPostRepository {
 	v.DB = v.DB.Clauses(clause.Locking{Strength: "UPDATE"})
 	return v
 }
 
 func (v VideoPostRepository) Update(ctx context.Context, post *entity.VideoPost) error {
-	_, span := tracing.RepositorySpanFactory(v.TracerProvider, ctx, pkg, "VideoPostRepository.Update")
+	newCtx, span := tracing.RepositorySpanFactory(v.TracerProvider, ctx, pkg, "VideoPostRepository.Update")
 	defer span.End()
 
-	tx := v.DB.Updates(post)
-	if tx.Error != nil {
-		return tx.Error
+	err := v.DB.Transaction(func(tx *gorm.DB) error {
+		video, err := v.FindById(newCtx, post.Id)
+		if err != nil {
+			return err
+		}
+
+		result := v.DB.Updates(post).Where("id = ?", video.Id)
+		if result.Error != nil {
+			return result.Error
+		}
+
+		return nil
+	})
+	if err != nil {
+		span.RecordError(err)
+		return err
 	}
 
 	return nil

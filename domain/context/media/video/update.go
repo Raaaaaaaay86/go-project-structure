@@ -65,9 +65,7 @@ func (uc UpdateVideoInfoUseCase) Execute(ctx context.Context, cmd UpdateVideoInf
 		return nil, err
 	}
 
-	tx := uc.VideoPostRepository.StartTx()
-
-	video, err := uc.VideoPostRepository.WithTx(tx).FindById(newCtx, cmd.VideoId)
+	video, err := uc.VideoPostRepository.FindById(newCtx, cmd.VideoId)
 	if err != nil {
 		span.RecordError(err)
 		return nil, err
@@ -81,13 +79,11 @@ func (uc UpdateVideoInfoUseCase) Execute(ctx context.Context, cmd UpdateVideoInf
 	video.Title = cmd.Title
 	video.Description = cmd.Description
 
-	err = uc.VideoPostRepository.WithTx(tx).ForUpdate().Update(newCtx, video)
+	err = uc.VideoPostRepository.Update(newCtx, video)
 	if err != nil {
 		span.RecordError(err)
 		return nil, err
 	}
-
-	uc.VideoPostRepository.CommitTx(tx)
 
 	return &UpdateVideoInfoResponse{VideoPost: video}, nil
 }

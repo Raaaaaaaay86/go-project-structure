@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
-	"github.com/raaaaaaaay86/go-project-structure/domain/repository"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"gorm.io/gorm"
@@ -57,9 +56,4 @@ func (u UserRepository) FindByUsername(ctx context.Context, username string) (*e
 	}
 
 	return &user, nil
-}
-
-func (u UserRepository) WithPreload() repository.UserRepository {
-	u.DB = u.DB.Preload("Roles")
-	return u
 }
