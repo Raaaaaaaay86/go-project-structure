@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
+	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/domain/repository"
 	"github.com/raaaaaaaay86/go-project-structure/domain/vo"
 	"github.com/raaaaaaaay86/go-project-structure/domain/vo/enum/role"
@@ -15,6 +16,19 @@ type RegisterUserCommand struct {
 	Username          string               `json:"username,omitempty" example:"username01"`
 	DecryptedPassword vo.DecryptedPassword `json:"password,omitempty" example:"password"`
 	Email             vo.Email             `json:"email,omitempty" example:"example@gmail.com"`
+}
+
+func (c RegisterUserCommand) Validate() error {
+	if c.Username == "" || c.DecryptedPassword == "" || c.Email == "" {
+		return exception.ErrEmptyInput
+	}
+	if err := c.DecryptedPassword.Validate(); err != nil {
+		return err
+	}
+	if err := c.Email.Validate(); err != nil {
+		return err
+	}
+	return nil
 }
 
 type RegisterUserResponse struct {
@@ -42,7 +56,7 @@ func (u RegisterUserUseCase) Execute(ctx context.Context, cmd RegisterUserComman
 	newCtx, span := tracing.ApplicationSpanFactory(u.TracerProvider, ctx, pkg, "RegisterUserUseCase.Execute")
 	defer span.End()
 
-	err := validate.Do(cmd.Email, cmd.DecryptedPassword)
+	err := validate.Do(cmd)
 	if err != nil {
 		return nil, err
 	}
