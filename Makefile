@@ -5,6 +5,7 @@ DB_ROOT_PASSWORD=123456
 set_up:
 	bash ./scripts/setup.sh
 run:
+	docker-compose up -d
 	go run main.go
 swag_init:
 	swag init --generalInfo ./adapter/port_in/http/gin.go
