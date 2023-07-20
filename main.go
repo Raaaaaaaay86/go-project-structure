@@ -32,12 +32,28 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer zapLogger.Sync()
+	defer zapLogger.Sync() //nolint:errcheck
 
-	// TracerProviders
-	appTracer := tracing.NewJaegerTracerProvider("application")
-	ginTracer := tracing.NewJaegerTracerProvider("http")
-	repositoryTracer := tracing.NewJaegerTracerProvider("repository")
+	// Tracer
+	exporter, err := tracing.NewJaegerExporter(config.Jaeger.Endpoint)
+	if err != nil {
+		zapLogger.Error("jaeger exporter error", err)
+	}
+
+	appTracer, err := tracing.NewJaegerTracerProvider("application", exporter)
+	if err != nil {
+		zapLogger.Error("init application tracer failed.", err)
+	}
+
+	httpTracer, err := tracing.NewJaegerTracerProvider("http", exporter)
+	if err != nil {
+		zapLogger.Error("init http tracer failed", err)
+	}
+
+	repositoryTracer, err := tracing.NewJaegerTracerProvider("repository", exporter)
+	if err != nil {
+		zapLogger.Error("init repository tracer failed", err)
+	}
 
 	// Neo4j Driver
 	neo4jDriver, err := graphdb.NewNeo4j(ctx, config.Neo4j)
@@ -80,9 +96,9 @@ func main() {
 
 	// HTTP Server
 
-	authController := route.NewAuthenticationController(ginTracer, registerUseCase, loginUseCase)
-	videoController := route.NewVideoController(ginTracer, uploadVideoUseCase, createVideoUseCase, likeVideoUseCase, unlikeVideoUseCase)
-	commentController := route.NewCommentController(ginTracer, createCommentUseCase, findCommentByVideoUseCase, deleteCommentUseCase, forceDeleteCommentUseCase)
+	authController := route.NewAuthenticationController(httpTracer, registerUseCase, loginUseCase)
+	videoController := route.NewVideoController(httpTracer, uploadVideoUseCase, createVideoUseCase, likeVideoUseCase, unlikeVideoUseCase)
+	commentController := route.NewCommentController(httpTracer, createCommentUseCase, findCommentByVideoUseCase, deleteCommentUseCase, forceDeleteCommentUseCase)
 
 	httpPort := fmt.Sprintf(":%d", config.Http.Port)
 	err = http.

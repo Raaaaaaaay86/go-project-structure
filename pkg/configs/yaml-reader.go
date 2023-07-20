@@ -35,12 +35,17 @@ type Neo4j struct {
 	Password string `yaml:"password"`
 }
 
+type Jaeger struct {
+	Endpoint string `yaml:"endpoint"`
+}
+
 type YamlConfig struct {
 	Http       Http       `yaml:"http"`
 	Postgres   Postgres   `yaml:"postgres"`
 	BucketPath BucketPath `yaml:"bucketPath"`
 	MongoDB    Mongo      `yaml:"mongodb"`
 	Neo4j      Neo4j      `yaml:"neo4j"`
+	Jaeger     Jaeger     `yaml:"jaeger"`
 }
 
 func ReadYaml(path string) (*YamlConfig, error) {

@@ -30,8 +30,8 @@ func newStdOutExporter() (*stdouttrace.Exporter, error) {
 	)
 }
 
-func newJaegerExporter() (*jaeger.Exporter, error) {
-	return jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint("http://localhost:14268/api/traces")))
+func NewJaegerExporter(endpoint string) (*jaeger.Exporter, error) {
+	return jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(endpoint)))
 }
 
 func NewStdOutTracerProvider(serviceName string) *traceSdk.TracerProvider {
@@ -54,16 +54,13 @@ func NewEmptyTracerProvider() *traceSdk.TracerProvider {
 	return traceSdk.NewTracerProvider(traceSdk.WithResource(traceResource))
 }
 
-func NewJaegerTracerProvider(serviceName string) *traceSdk.TracerProvider {
+func NewJaegerTracerProvider(serviceName string, exporter *jaeger.Exporter) (*traceSdk.TracerProvider, error) {
 	traceResource, err := newTraceResource(serviceName)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	traceExporter, err := newJaegerExporter()
-	if err != nil {
-		panic(err)
-	}
-	return traceSdk.NewTracerProvider(traceSdk.WithResource(traceResource), traceSdk.WithBatcher(traceExporter))
+
+	return traceSdk.NewTracerProvider(traceSdk.WithResource(traceResource), traceSdk.WithBatcher(exporter)), nil
 }
 
 func HttpSpanFactory(tracerProvider *traceSdk.TracerProvider, ctx *gin.Context, fullPackage string) (context.Context, trace.Span) {
