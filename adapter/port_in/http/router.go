@@ -2,7 +2,7 @@ package http
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/raaaaaaaay86/go-project-structure/adapter/port_in/http/controller"
+	"github.com/raaaaaaaay86/go-project-structure/adapter/port_in/http/route"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/middleware"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -20,9 +20,9 @@ import (
 //	@in							header
 //	@name						Authorization
 func NewHttpServer(
-	authController controller.IAuthenticationController,
-	videoController controller.IVideoController,
-	commentController controller.ICommentController,
+	authController route.IAuthenticationController,
+	videoController route.IVideoController,
+	commentController route.ICommentController,
 ) *gin.Engine {
 	engine := gin.Default()
 
@@ -41,7 +41,7 @@ func NewHttpServer(
 	return engine
 }
 
-func setAuthRouter(parent *gin.RouterGroup, auth controller.IAuthenticationController) {
+func setAuthRouter(parent *gin.RouterGroup, auth route.IAuthenticationController) {
 	group := parent.Group("/auth")
 	{
 		group.POST("/register", auth.Register)
@@ -49,7 +49,7 @@ func setAuthRouter(parent *gin.RouterGroup, auth controller.IAuthenticationContr
 	}
 }
 
-func setVideoRouter(parent *gin.RouterGroup, video controller.IVideoController) {
+func setVideoRouter(parent *gin.RouterGroup, video route.IVideoController) {
 	group := parent.Group("/video", middleware.Token)
 	{
 		group.POST("/upload", video.Upload)
@@ -59,7 +59,7 @@ func setVideoRouter(parent *gin.RouterGroup, video controller.IVideoController) 
 	}
 }
 
-func setCommentRouter(parent *gin.RouterGroup, comment controller.ICommentController) {
+func setCommentRouter(parent *gin.RouterGroup, comment route.ICommentController) {
 	group := parent.Group("/comment")
 	{
 		group.POST("/create", middleware.Token, comment.Create)

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/raaaaaaaay86/go-project-structure/adapter/port_in/http"
-	"github.com/raaaaaaaay86/go-project-structure/adapter/port_in/http/controller"
+	"github.com/raaaaaaaay86/go-project-structure/adapter/port_in/http/route"
 	mongodb "github.com/raaaaaaaay86/go-project-structure/adapter/port_out/repository"
 	_ "github.com/raaaaaaaay86/go-project-structure/docs" //nolint:typecheck
 	"github.com/raaaaaaaay86/go-project-structure/domain/context/auth"
@@ -80,9 +80,9 @@ func main() {
 
 	// HTTP Server
 
-	authController := controller.NewAuthenticationController(ginTracer, registerUseCase, loginUseCase)
-	videoController := controller.NewVideoController(ginTracer, uploadVideoUseCase, createVideoUseCase, likeVideoUseCase, unlikeVideoUseCase)
-	commentController := controller.NewCommentController(ginTracer, createCommentUseCase, findCommentByVideoUseCase, deleteCommentUseCase, forceDeleteCommentUseCase)
+	authController := route.NewAuthenticationController(ginTracer, registerUseCase, loginUseCase)
+	videoController := route.NewVideoController(ginTracer, uploadVideoUseCase, createVideoUseCase, likeVideoUseCase, unlikeVideoUseCase)
+	commentController := route.NewCommentController(ginTracer, createCommentUseCase, findCommentByVideoUseCase, deleteCommentUseCase, forceDeleteCommentUseCase)
 
 	httpPort := fmt.Sprintf(":%d", config.Http.Port)
 	err = http.
