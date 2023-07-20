@@ -17,6 +17,16 @@ func (_m *IVideoController) Create(ctx *gin.Context) {
 	_m.Called(ctx)
 }
 
+// LikeVideo provides a mock function with given fields: ctx
+func (_m *IVideoController) LikeVideo(ctx *gin.Context) {
+	_m.Called(ctx)
+}
+
+// UnLikeVideo provides a mock function with given fields: ctx
+func (_m *IVideoController) UnLikeVideo(ctx *gin.Context) {
+	_m.Called(ctx)
+}
+
 // Upload provides a mock function with given fields: ctx
 func (_m *IVideoController) Upload(ctx *gin.Context) {
 	_m.Called(ctx)
