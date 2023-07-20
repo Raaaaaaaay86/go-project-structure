@@ -22,13 +22,11 @@ services:
     restart: always
     volumes:
       - video-mongo-data:/data/db
-      - ./scripts/mongo-replica.key:/data/mongo-replica.key
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: 123456
     ports:
       - "27017:27017"
-    command: ["--keyFile", "/data/mongo-replica.key", "--replSet", "dbrs", "--bind_ip_all"]
 
   neo4j:
     container_name: video-graphdb

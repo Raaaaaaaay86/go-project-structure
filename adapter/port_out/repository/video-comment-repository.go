@@ -8,8 +8,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/writeconcern"
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
@@ -87,39 +85,21 @@ func (v VideoCommentRepository) DeleteById(ctx context.Context, id primitive.Obj
 	newCtx, span := tracing.RepositorySpanFactory(v.TracerProvider, ctx, pkg, "VideoCommentRepository.DeleteById")
 	defer span.End()
 
-	session, err := v.Client.StartSession()
+	comment, err := v.FindById(newCtx, id)
 	if err != nil {
-		span.RecordError(err)
-		return 0, err
-	}
-	defer session.EndSession(newCtx)
-
-	wc := writeconcern.Majority()
-	txnOptions := options.Transaction().SetWriteConcern(wc)
-
-	deleteCount, err := session.WithTransaction(newCtx, func(sessionContext mongo.SessionContext) (interface{}, error) {
-		comment, err := v.FindById(newCtx, id)
-		if err != nil {
-			return 0, err
-		}
-
-		if comment.AuthorId != deleterId {
-			return 0, exception.ErrUnauthorized
-		}
-
-		deleteResult, err := v.comments().DeleteOne(sessionContext, bson.M{"_id": id})
-		if err != nil {
-			return nil, err
-		}
-
-		return deleteResult.DeletedCount, nil
-	}, txnOptions)
-	if err != nil {
-		span.RecordError(err)
 		return 0, err
 	}
 
-	return int(deleteCount.(int64)), nil
+	if comment.AuthorId != deleterId {
+		return 0, exception.ErrUnauthorized
+	}
+
+	deleteResult, err := v.comments().DeleteOne(newCtx, bson.M{"_id": id})
+	if err != nil {
+		return 0, err
+	}
+
+	return int(deleteResult.DeletedCount), nil
 }
 
 func (v VideoCommentRepository) ForceDeleteById(ctx context.Context, id primitive.ObjectID) (int, error) {
