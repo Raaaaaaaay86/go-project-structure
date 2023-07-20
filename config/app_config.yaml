@@ -23,5 +23,5 @@ jaeger:
   endpoint: http://localhost:14268/api/traces
 
 bucketPath:
-  raw: /Users/linjiafu/project/go-video-demo/bucket
-  converted: /Users/linjiafu/project/go-video-demo/bucket/converted
+  raw: ${WORK_DIR}/bucket
+  converted: ${WORK_DIR}/bucket/converted

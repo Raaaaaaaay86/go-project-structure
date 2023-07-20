@@ -2,6 +2,8 @@ DB_SCHEMA=video
 DB_ROOT_PASSWORD=123456
 
 # Application
+set_up:
+	bash ./scripts/setup.sh
 run:
 	go run main.go
 swag_init:
