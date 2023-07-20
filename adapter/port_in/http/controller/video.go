@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/raaaaaaaay86/go-project-structure/domain/context/media/video"
+	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/jwt"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/res"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
@@ -101,6 +102,7 @@ func (v VideoController) Create(ctx *gin.Context) {
 	token, exists := ctx.Get("token")
 	if !exists {
 		ctx.JSON(http.StatusUnauthorized, res.Fail("token is not found.", nil))
+		tracing.RecordHttpError(span, http.StatusUnauthorized, exception.ErrUnauthorized)
 		return
 	}
 
@@ -110,12 +112,14 @@ func (v VideoController) Create(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(&cmd)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, res.Fail(err.Error(), "invalid request body."))
+		tracing.RecordHttpError(span, http.StatusBadRequest, err)
 		return
 	}
 
 	response, err := v.CreateVideoUseCase.Execute(newCtx, cmd)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, res.Fail(err.Error(), "unable to create video post."))
+		tracing.RecordHttpError(span, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -129,6 +133,7 @@ func (v VideoController) LikeVideo(ctx *gin.Context) {
 	token, exists := ctx.Get("token")
 	if !exists {
 		ctx.JSON(http.StatusUnauthorized, res.Fail("token is not found.", nil))
+		tracing.RecordHttpError(span, http.StatusUnauthorized, exception.ErrUnauthorized)
 		return
 	}
 
@@ -136,6 +141,7 @@ func (v VideoController) LikeVideo(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(&cmd)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, res.Fail(err.Error(), "invalid request body."))
+		tracing.RecordHttpError(span, http.StatusBadRequest, err)
 		return
 	}
 	cmd.UserId = (token.(*jwt.CustomClaim)).Uid
@@ -143,6 +149,7 @@ func (v VideoController) LikeVideo(ctx *gin.Context) {
 	response, err := v.LikeVideoUseCase.Execute(newCtx, cmd)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, res.Fail(err.Error(), "unable to like video."))
+		tracing.RecordHttpError(span, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -156,6 +163,7 @@ func (v VideoController) UnLikeVideo(ctx *gin.Context) {
 	token, exists := ctx.Get("token")
 	if !exists {
 		ctx.JSON(http.StatusUnauthorized, res.Fail("token is not found.", nil))
+		tracing.RecordHttpError(span, http.StatusUnauthorized, exception.ErrUnauthorized)
 		return
 	}
 
@@ -163,6 +171,7 @@ func (v VideoController) UnLikeVideo(ctx *gin.Context) {
 	err := ctx.ShouldBindJSON(&cmd)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, res.Fail(err.Error(), "invalid request body."))
+		tracing.RecordHttpError(span, http.StatusBadRequest, err)
 		return
 	}
 	cmd.UserId = (token.(*jwt.CustomClaim)).Uid
@@ -170,6 +179,7 @@ func (v VideoController) UnLikeVideo(ctx *gin.Context) {
 	response, err := v.UnLikeVideoUseCase.Execute(newCtx, cmd)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, res.Fail(err.Error(), "unable to like video."))
+		tracing.RecordHttpError(span, http.StatusInternalServerError, err)
 		return
 	}
 
