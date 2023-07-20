@@ -36,10 +36,6 @@ libswresample   4. 10.100 /  4. 10.100
 libpostproc    57.  1.100 / 57.  1.100
 ```
 - 安裝[Docker](https://www.docker.com/products/docker-desktop/)，使用Docker Compose搭建環境(Postgres, MongoDB...)
-```shell
-# 啟動環境
-    docker-compose up -d
-```
 
 # 啟動專案
 執行終端指令
@@ -48,6 +44,7 @@ make run
 ```
 或是
 ```shell
+docker-compose up -d
 go run main.go
 ```
 
@@ -65,7 +62,7 @@ Application Layer是Domain Layer的橋樑，負責將Domain Layer的業務邏輯
 ## Adapter Layer
 Adapter Layer負責將外部的請求轉換成Application Layer的輸入(e.g. HTTP, gRPC等請求)，或將Application Layer的輸出轉換成外部的輸出(e.g. 存取資料庫, 請求外部服務)。
 
-# 資料夾結構說明
+# 資料夾結構
 ```text
 .
 ├── .
@@ -100,3 +97,147 @@ Adapter Layer負責將外部的請求轉換成Application Layer的輸入(e.g. HT
 ├── ├── Makefile
 └── └── scripts
 ```
+
+## Entity
+宣告一個Entity並不需要完全按照Database的Schema來設計，而是以業務邏輯為主，並且不依賴任何外部服務。以下為一個User Entity的範例。
+```go
+type User struct {
+	Id        uint                 `json:"id"`
+	Roles     []Role               `json:"roles" gorm:"many2many:user_roles"`
+	Username  string               `json:"username"`
+	Password  vo.EncryptedPassword `json:"password"`
+	Email     vo.Email             `json:"email"`
+	CreatedAt time.Time            `json:"created_at,omitempty"`
+	UpdatedAt time.Time            `json:"updated_at,omitempty"`
+	DeletedAt sql.NullTime         `json:"deleted_at,omitempty"`
+}
+
+// 務必創建一個Constructor function.
+func NewUser(username string, password vo.EncryptedPassword, email vo.Email, roles ...Role) *User {
+	return &User{
+		Roles:    roles,
+		Username: username,
+		Password: password,
+		Email:    email,
+	}
+}
+
+```
+
+## Application Layer 應依賴於 Repository Interface
+Application Layer的UseCase應該依賴於Repository Interface，而不是Adapter Layer中Repository的實作。如此才能達到解耦的效果，並且可以
+輕易替換Repository實作(e.g. MySQL替換為Postgres)。且可以在沒有Database的情況下，先開發出Application Layer的商業邏輯。
+再做Unit Test時針對Repository Interface做Mock即可，不需要真的連接到資料庫。
+```go
+type VideoCommentRepository interface {
+    Create(ctx context.Context, comment *entity.VideoComment) error
+    FindByVideoId(ctx context.Context, videoId uint) ([]*entity.VideoComment, error)
+    FindById(ctx context.Context, id primitive.ObjectID) (*entity.VideoComment, error)
+    DeleteById(ctx context.Context, id primitive.ObjectID, deleterId uint) (int, error)
+    ForceDeleteById(ctx context.Context, id primitive.ObjectID) (int, error)
+}
+```
+
+## 讀寫分離模式(CQRS)拆分UseCase
+將寫入與讀取的行為拆分為獨立的UseCase，藉此維持函式呼叫的冪等性，避免意外的副作用，同時提升寫入和讀取的效率。  
+
+一個有寫入行為的UseCase會以此方式宣告，`xxx`則為該UseCase的行為名稱(e.g. Login, CreateProduct...)
+```go
+package subdomain
+
+type xxxCommand struct {
+    ParameterA uint
+    RandomEntity  eneity.RandomEntity
+}
+
+type xxxResponse struct {
+	
+}
+
+type IxxxUseCase interface {
+    Execute(ctx context.Context, cmd xxxCommand) (*xxxResponse, error)
+}
+
+type xxxUseCase struct {
+    RandomEntityRepository repository.RandomEntityRepository // 請宣告為介面！
+}
+
+func NewxxxUseCase(randomEntityRepository repository.RandomEntityRepository) *xxxUseCase {
+    return &xxxUseCase{
+        RandomEntityRepository: randomEntityRepository,
+    }
+}
+
+func (uc xxxUseCase) Execute(ctx context.Context, cmd xxxCommand) (*xxxResponse, error) {
+    err := uc.RandomEntityRepository.Create(cmd.RandomEntity)
+    if err != nil {
+        return nil, err
+    }
+	
+    return &xxxResponse{}, nil
+}
+```
+若為讀取行為的UseCase則將`xxxCommand`改為`xxxQuery`，表達執行一個讀取操作。
+
+## DTO 該放在哪？
+若DTO與UseCase的Command欄位完全相同，則可不必轉換，直接將Command當作DTO使用，直接將Application Layer與Adapter Layer耦合，避免代碼冗余。
+若需要建立則在internal/dto下建立，供Adapter Layer使用。
+```go
+func (c CommentController) Create(ctx *gin.Context) {
+    newCtx, span := tracing.HttpSpanFactory(c.TracerProvider, ctx, pkg)
+    defer span.End()
+
+    token, exists := ctx.Get("token")
+    if !exists {
+        ctx.JSON(http.StatusUnauthorized, res.Fail(exception.ErrUnauthorized.Error(), nil))
+        tracing.RecordHttpError(span, http.StatusUnauthorized, exception.ErrUnauthorized)
+        return
+    }
+
+    cmd := comment.CreateCommentCommand{
+        AuthorId: token.(*jwt.CustomClaim).Uid,
+    }
+    err := ctx.ShouldBindJSON(&cmd)
+    if err != nil {
+        ctx.JSON(http.StatusBadRequest, res.Fail(err.Error(), "invalid request body."))
+        tracing.RecordHttpError(span, http.StatusUnauthorized, err)
+        return
+    }
+
+    response, err := c.CreateUseCase.Execute(newCtx, cmd)
+    if err != nil {
+        ctx.JSON(http.StatusInternalServerError, res.Fail(err.Error(), "unable to create comment."))
+        tracing.RecordHttpError(span, http.StatusInternalServerError, err)
+        return
+    }
+
+    ctx.JSON(http.StatusCreated, res.Success(response))
+}
+```
+
+## 可觀測性
+![image](./markdown/resource/jaeger.png)
+OpenTelemetry是由`context.Context`的傳播機制來做鏈路追蹤，因此在每層架構中應將`context.Context`傳遞下去，使後續開發以及運維單位能夠輕易的追蹤到
+每個請求的狀態。  
+***無論當前是否有使用可觀測性工具，建議都在每層函式呼叫的第一個參數加上`context.Context`，並且在每層函式呼叫時將context.Context傳遞下去。
+避免未來需要加入可觀測性工具時，需要大量的修改代碼。***
+
+範例 1. Use Case
+```go
+type IxxxUseCase interface {
+    Execute(ctx context.Context, cmd xxxCommand) (*xxxResponse, error)
+}
+```
+
+範例 2. Repository
+```go
+type UserRepository interface {
+    Create(ctx context.Context, user *entity.User) error
+    FindByUsername(ctx context.Context, username string) (*entity.User, error)
+    FindById(ctx context.Context, id uint) (*entity.User, error)
+}
+```
+
+## 組件之間應依賴於介面
+組件之間應依賴於介面，而不是實作。如此才能避免耦合。
+
