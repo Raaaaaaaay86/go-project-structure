@@ -14,5 +14,3 @@ if ! which ffmpeg >/dev/null 2>&1; then
 fi
 
 docker-compose up -d
-
-docker exec -it video-mongodb mongosh -u root -p 123456 --quiet --eval "rs.initiate();"
