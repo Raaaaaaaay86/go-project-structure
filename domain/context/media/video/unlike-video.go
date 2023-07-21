@@ -6,6 +6,8 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
+var _ IUnLikeVideoUseCase = (*UnLikeVideoUseCase)(nil)
+
 type UnLikeVideoCommand struct {
 	VideoId uint
 	UserId  uint

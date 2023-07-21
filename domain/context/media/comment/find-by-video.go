@@ -10,6 +10,8 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
+var _ IFindByVideoUseCase = (*FindByVideoUseCase)(nil)
+
 type FindByVideoQuery struct {
 	VideoId uint `form:"videoId"`
 }

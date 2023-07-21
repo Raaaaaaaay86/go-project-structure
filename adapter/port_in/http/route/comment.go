@@ -11,6 +11,8 @@ import (
 	"net/http"
 )
 
+var _ ICommentController = (*CommentController)(nil)
+
 type ICommentController interface {
 	Create(ctx *gin.Context)
 	Find(ctx *gin.Context)
@@ -19,14 +21,14 @@ type ICommentController interface {
 }
 
 type CommentController struct {
-	CreateUseCase              comment.IVideoCommentCreateUseCase
+	CreateUseCase              comment.ICreateCommentUseCase
 	FindByVideoIdUseCase       comment.IFindByVideoUseCase
 	DeleteCommentUseCase       comment.IDeleteCommentUseCase
 	ForceDeleteCommentUserCase comment.IForceDeleteCommentUseCase
 	TracerProvider             *trace.TracerProvider
 }
 
-func NewCommentController(tracerProvider *trace.TracerProvider, createCommentUseCase comment.IVideoCommentCreateUseCase, findByVideoUseCase comment.IFindByVideoUseCase, deleteCommentUseCase comment.IDeleteCommentUseCase, forceDeleteUseCase comment.IForceDeleteCommentUseCase) *CommentController {
+func NewCommentController(tracerProvider *trace.TracerProvider, createCommentUseCase comment.ICreateCommentUseCase, findByVideoUseCase comment.IFindByVideoUseCase, deleteCommentUseCase comment.IDeleteCommentUseCase, forceDeleteUseCase comment.IForceDeleteCommentUseCase) *CommentController {
 	return &CommentController{
 		CreateUseCase:              createCommentUseCase,
 		FindByVideoIdUseCase:       findByVideoUseCase,

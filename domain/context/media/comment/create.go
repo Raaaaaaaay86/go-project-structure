@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+var _ ICreateCommentUseCase = (*CreateCommentUseCase)(nil)
+
 type CreateCommentCommand struct {
 	Comment  string `json:"comment"`
 	VideoId  uint   `json:"videoId"`
@@ -28,7 +30,7 @@ type CreateCommentResponse struct {
 	CommendId string `json:"commend_id"`
 }
 
-type IVideoCommentCreateUseCase interface {
+type ICreateCommentUseCase interface {
 	Execute(ctx context.Context, cmd CreateCommentCommand) (*CreateCommentResponse, error)
 }
 

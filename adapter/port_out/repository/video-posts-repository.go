@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+var _ repository.VideoPostRepository = (*VideoPostRepository)(nil)
+
 type VideoPostRepository struct {
 	DB             *gorm.DB
 	GraphDB        neo4j.DriverWithContext

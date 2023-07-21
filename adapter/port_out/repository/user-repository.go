@@ -3,10 +3,13 @@ package repository
 import (
 	"context"
 	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
+	"github.com/raaaaaaaay86/go-project-structure/domain/repository"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"go.opentelemetry.io/otel/sdk/trace"
 	"gorm.io/gorm"
 )
+
+var _ repository.UserRepository = (*UserRepository)(nil)
 
 type UserRepository struct {
 	DB             *gorm.DB

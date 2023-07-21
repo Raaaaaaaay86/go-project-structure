@@ -9,6 +9,8 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
+var _ IDeleteCommentUseCase = (*DeleteCommentUseCase)(nil)
+
 type DeleteCommentCommand struct {
 	CommentId  primitive.ObjectID `json:"commentId"`
 	ExecutorId uint               `json:"-"`

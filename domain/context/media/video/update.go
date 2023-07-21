@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm"
 )
 
+var _ IUpdateVideoInfoUseCase = (*UpdateVideoInfoUseCase)(nil)
+
 type UpdateVideoInfoCommand struct {
 	UpdaterId   uint
 	VideoId     uint
@@ -39,7 +41,7 @@ type UpdateVideoInfoResponse struct {
 }
 
 type IUpdateVideoInfoUseCase interface {
-	Execute(cmd UpdateVideoInfoCommand) (*UpdateVideoInfoResponse, error)
+	Execute(ctx context.Context, cmd UpdateVideoInfoCommand) (*UpdateVideoInfoResponse, error)
 }
 
 type UpdateVideoInfoUseCase struct {

@@ -10,6 +10,8 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
+var _ ICreateVideoUseCase = (*CreateVideoUseCase)(nil)
+
 type CreateVideoCommand struct {
 	Title       string `json:"title,omitempty"`
 	Description string `json:"description,omitempty"`
@@ -34,26 +36,26 @@ func (c CreateVideoCommand) Validate() error {
 type CreateVideoResponse struct {
 }
 
-type IVideoCreateUseCase interface {
+type ICreateVideoUseCase interface {
 	Execute(ctx context.Context, cmd CreateVideoCommand) (*CreateVideoResponse, error)
 }
 
-type VideoCreateUseCase struct {
+type CreateVideoUseCase struct {
 	VideoPostRepository repository.VideoPostRepository
 	UserRepository      repository.UserRepository
 	TracerProvider      *trace.TracerProvider
 }
 
-func NewCreateVideoUseCase(tracerProvider *trace.TracerProvider, videoPostRepository repository.VideoPostRepository, userRepository repository.UserRepository) *VideoCreateUseCase {
-	return &VideoCreateUseCase{
+func NewCreateVideoUseCase(tracerProvider *trace.TracerProvider, videoPostRepository repository.VideoPostRepository, userRepository repository.UserRepository) *CreateVideoUseCase {
+	return &CreateVideoUseCase{
 		VideoPostRepository: videoPostRepository,
 		UserRepository:      userRepository,
 		TracerProvider:      tracerProvider,
 	}
 }
 
-func (v VideoCreateUseCase) Execute(ctx context.Context, cmd CreateVideoCommand) (*CreateVideoResponse, error) {
-	newCtx, span := tracing.ApplicationSpanFactory(v.TracerProvider, ctx, pkg, "VideoCreateUseCase.Execute")
+func (v CreateVideoUseCase) Execute(ctx context.Context, cmd CreateVideoCommand) (*CreateVideoResponse, error) {
+	newCtx, span := tracing.ApplicationSpanFactory(v.TracerProvider, ctx, pkg, "CreateVideoUseCase.Execute")
 	defer span.End()
 
 	err := validate.Do(cmd)

@@ -12,6 +12,8 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
+var _ IRegisterUserUseCase = (*RegisterUserUseCase)(nil)
+
 type RegisterUserCommand struct {
 	Username          string               `json:"username,omitempty" example:"username01"`
 	DecryptedPassword vo.DecryptedPassword `json:"password,omitempty" example:"password"`

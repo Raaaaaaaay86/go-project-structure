@@ -12,6 +12,8 @@ import (
 	"io"
 )
 
+var _ IUploadVideoUseCase = (*UploadVideoUseCase)(nil)
+
 type UploadVideoCommand struct {
 	File       io.Reader `json:"-"`
 	FileName   string    `json:"-"`

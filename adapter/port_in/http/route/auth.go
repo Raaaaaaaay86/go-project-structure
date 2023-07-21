@@ -9,6 +9,8 @@ import (
 	"net/http"
 )
 
+var _ IAuthenticationController = (*AuthenticationController)(nil)
+
 type IAuthenticationController interface {
 	Register(ctx *gin.Context)
 	Login(ctx *gin.Context)
