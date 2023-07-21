@@ -143,6 +143,8 @@ type VideoCommentRepository interface {
 ```
 
 ## 讀寫分離模式(CQRS)拆分UseCase
+推薦閱讀：[CQRS 命令查詢職責分離模式 Ajay Kumar 著 錢亞宏 譯](https://www.tenlong.com.tw/products/9789864347926)  
+
 將寫入與讀取的行為拆分為獨立的UseCase，藉此維持函式呼叫的冪等性，避免意外的副作用，同時提升寫入和讀取的效率。  
 
 一個有寫入行為的UseCase會以此方式宣告，`xxx`則為該UseCase的行為名稱(e.g. Login, CreateProduct...)
