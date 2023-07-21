@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var _ IUpdateVideoInfoUseCase = (*UpdateVideoInfoUseCase)(nil)
+var _ validate.Validator = (*UpdateVideoInfoCommand)(nil)
 
 type UpdateVideoInfoCommand struct {
 	UpdaterId   uint
@@ -43,6 +43,8 @@ type UpdateVideoInfoResponse struct {
 type IUpdateVideoInfoUseCase interface {
 	Execute(ctx context.Context, cmd UpdateVideoInfoCommand) (*UpdateVideoInfoResponse, error)
 }
+
+var _ IUpdateVideoInfoUseCase = (*UpdateVideoInfoUseCase)(nil)
 
 type UpdateVideoInfoUseCase struct {
 	VideoPostRepository repository.VideoPostRepository

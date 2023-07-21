@@ -11,8 +11,6 @@ import (
 	"net/http"
 )
 
-var _ IVideoController = (*VideoController)(nil)
-
 type IVideoController interface {
 	Upload(ctx *gin.Context)
 	Create(ctx *gin.Context)
@@ -27,6 +25,8 @@ type VideoController struct {
 	UnLikeVideoUseCase video.IUnLikeVideoUseCase
 	TracerProvider     *trace.TracerProvider
 }
+
+var _ IVideoController = (*VideoController)(nil)
 
 func NewVideoController(
 	tracerProvider *trace.TracerProvider,

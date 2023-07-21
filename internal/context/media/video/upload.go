@@ -12,7 +12,7 @@ import (
 	"io"
 )
 
-var _ IUploadVideoUseCase = (*UploadVideoUseCase)(nil)
+var _ validate.Validator = (*UploadVideoCommand)(nil)
 
 type UploadVideoCommand struct {
 	File       io.Reader `json:"-"`
@@ -37,6 +37,8 @@ type UploadVideoResponse struct {
 type IUploadVideoUseCase interface {
 	Execute(ctx context.Context, cmd UploadVideoCommand) (*UploadVideoResponse, error)
 }
+
+var _ IUploadVideoUseCase = (*UploadVideoUseCase)(nil)
 
 type UploadVideoUseCase struct {
 	FileUploader   bucket.Uploader

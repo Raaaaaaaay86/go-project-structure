@@ -11,7 +11,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
-var _ ILoginUserResponse = (*LoginUserUseCase)(nil)
+var _ validate.Validator = (*LoginUserCommand)(nil)
 
 type LoginUserCommand struct {
 	Username          string               `json:"username,omitempty" example:"username01"`
@@ -32,6 +32,8 @@ type LoginUserResponse struct {
 type ILoginUserResponse interface {
 	Execute(ctx context.Context, cmd LoginUserCommand) (*LoginUserResponse, error)
 }
+
+var _ ILoginUserResponse = (*LoginUserUseCase)(nil)
 
 type LoginUserUseCase struct {
 	UserRepository repository.UserRepository

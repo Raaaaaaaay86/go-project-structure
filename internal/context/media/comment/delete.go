@@ -9,8 +9,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
-var _ IDeleteCommentUseCase = (*DeleteCommentUseCase)(nil)
-
 type DeleteCommentCommand struct {
 	CommentId  primitive.ObjectID `json:"commentId"`
 	ExecutorId uint               `json:"-"`
@@ -23,6 +21,8 @@ type DeleteCommentResponse struct {
 type IDeleteCommentUseCase interface {
 	Execute(ctx context.Context, cmd DeleteCommentCommand) (*DeleteCommentResponse, error)
 }
+
+var _ IDeleteCommentUseCase = (*DeleteCommentUseCase)(nil)
 
 type DeleteCommentUseCase struct {
 	VideoCommentRepository repository.VideoCommentRepository

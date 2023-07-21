@@ -12,7 +12,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
-var _ IRegisterUserUseCase = (*RegisterUserUseCase)(nil)
+var _ validate.Validator = (*RegisterUserCommand)(nil)
 
 type RegisterUserCommand struct {
 	Username          string               `json:"username,omitempty" example:"username01"`
@@ -41,6 +41,8 @@ type RegisterUserResponse struct {
 type IRegisterUserUseCase interface {
 	Execute(ctx context.Context, command RegisterUserCommand) (*RegisterUserResponse, error)
 }
+
+var _ IRegisterUserUseCase = (*RegisterUserUseCase)(nil)
 
 type RegisterUserUseCase struct {
 	userRepository repository.UserRepository

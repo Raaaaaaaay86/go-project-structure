@@ -6,8 +6,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
-var _ ILikeVideoUseCase = (*LikeVideoUseCase)(nil)
-
 type LikeVideoCommand struct {
 	VideoId uint `json:"videoId,omitempty"`
 	UserId  uint `json:"userId,omitempty"`
@@ -19,6 +17,8 @@ type LikeVideoResponse struct {
 type ILikeVideoUseCase interface {
 	Execute(ctx context.Context, cmd LikeVideoCommand) (*LikeVideoResponse, error)
 }
+
+var _ ILikeVideoUseCase = (*LikeVideoUseCase)(nil)
 
 type LikeVideoUseCase struct {
 	VideoPostRepository repository.VideoPostRepository

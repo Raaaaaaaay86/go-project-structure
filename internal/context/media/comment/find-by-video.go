@@ -10,7 +10,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
-var _ IFindByVideoUseCase = (*FindByVideoUseCase)(nil)
+var _ validate.Validator = (*FindByVideoQuery)(nil)
 
 type FindByVideoQuery struct {
 	VideoId uint `form:"videoId"`
@@ -30,6 +30,8 @@ type FindByVideoResponse struct {
 type IFindByVideoUseCase interface {
 	Execute(ctx context.Context, query FindByVideoQuery) (*FindByVideoResponse, error)
 }
+
+var _ IFindByVideoUseCase = (*FindByVideoUseCase)(nil)
 
 type FindByVideoUseCase struct {
 	VideoCommentRepository repository.VideoCommentRepository

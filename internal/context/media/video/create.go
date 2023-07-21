@@ -10,7 +10,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/trace"
 )
 
-var _ ICreateVideoUseCase = (*CreateVideoUseCase)(nil)
+var _ validate.Validator = (*CreateVideoCommand)(nil)
 
 type CreateVideoCommand struct {
 	Title       string `json:"title,omitempty"`
@@ -35,6 +35,8 @@ func (c CreateVideoCommand) Validate() error {
 
 type CreateVideoResponse struct {
 }
+
+var _ ICreateVideoUseCase = (*CreateVideoUseCase)(nil)
 
 type ICreateVideoUseCase interface {
 	Execute(ctx context.Context, cmd CreateVideoCommand) (*CreateVideoResponse, error)

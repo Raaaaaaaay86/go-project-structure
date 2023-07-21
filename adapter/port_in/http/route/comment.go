@@ -11,14 +11,14 @@ import (
 	"net/http"
 )
 
-var _ ICommentController = (*CommentController)(nil)
-
 type ICommentController interface {
 	Create(ctx *gin.Context)
 	Find(ctx *gin.Context)
 	UserDelete(ctx *gin.Context)
 	ForceDelete(ctx *gin.Context)
 }
+
+var _ ICommentController = (*CommentController)(nil)
 
 type CommentController struct {
 	CreateUseCase              comment.ICreateCommentUseCase

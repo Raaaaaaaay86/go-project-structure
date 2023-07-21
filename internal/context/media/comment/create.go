@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-var _ ICreateCommentUseCase = (*CreateCommentUseCase)(nil)
+var _ validate.Validator = (*CreateCommentCommand)(nil)
 
 type CreateCommentCommand struct {
 	Comment  string `json:"comment"`
@@ -33,6 +33,8 @@ type CreateCommentResponse struct {
 type ICreateCommentUseCase interface {
 	Execute(ctx context.Context, cmd CreateCommentCommand) (*CreateCommentResponse, error)
 }
+
+var _ ICreateCommentUseCase = (*CreateCommentUseCase)(nil)
 
 type CreateCommentUseCase struct {
 	VideoCommentRepo    repository.VideoCommentRepository
