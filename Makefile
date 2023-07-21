@@ -5,6 +5,7 @@ DB_ROOT_PASSWORD=123456
 set_up:
 	bash ./scripts/setup.sh
 run:
+	bash ./scripts/setup.sh
 	docker-compose up -d
 	migrate -path migration/postgres -database "postgres://root:123456@localhost:5432/$(DB_SCHEMA)?sslmode=disable" -verbose up
 	go run main.go
