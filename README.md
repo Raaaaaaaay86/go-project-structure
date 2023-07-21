@@ -18,6 +18,8 @@ Go和其他語言相比，在專案架構上並無限制，但是在實際開發
 
 # 環境設置
 - 安裝[Go](https://golang.org/doc/install)
+- 安裝[Docker](https://www.docker.com/products/docker-desktop/)，使用Docker Compose搭建環境(Postgres, MongoDB...)
+- 安裝[golang-migrate](https://github.com/golang-migrate/migrate)，用來執行資料庫遷移
 - 安裝[FFmpeg](https://ffmpeg.org/download.html)，此專案會使用到FFmpeg來處理影片上傳轉檔案
 ```shell
 # 檢查是否成功安裝
@@ -35,7 +37,6 @@ libswscale      7.  1.100 /  7.  1.100
 libswresample   4. 10.100 /  4. 10.100
 libpostproc    57.  1.100 / 57.  1.100
 ```
-- 安裝[Docker](https://www.docker.com/products/docker-desktop/)，使用Docker Compose搭建環境(Postgres, MongoDB...)
 
 # 啟動專案
 執行終端指令
@@ -45,6 +46,7 @@ make run
 或是
 ```shell
 docker-compose up -d
+migrate -path migration/postgres -database "postgres://root:123456@localhost:5432/$(DB_SCHEMA)?sslmode=disable" -verbose up
 go run main.go
 ```
 
@@ -98,6 +100,8 @@ Adapter Layer負責將外部的請求轉換成Application Layer的輸入(e.g. HT
 └── └── scripts
 ```
 
+# 開發準則
+
 ## Entity
 宣告一個Entity並不需要完全按照Database的Schema來設計，而是以業務邏輯為主，並且不依賴任何外部服務。以下為一個User Entity的範例。
 ```go
@@ -145,6 +149,8 @@ type VideoCommentRepository interface {
 ```go
 package subdomain
 
+var _ IxxxUseCase = (*xxxUseCase)(nil) // 檢查 xxxUseCase 是否實作 IxxxUseCase 介面
+
 type xxxCommand struct {
     ParameterA uint
     RandomEntity  eneity.RandomEntity
@@ -181,7 +187,8 @@ func (uc xxxUseCase) Execute(ctx context.Context, cmd xxxCommand) (*xxxResponse,
 
 ## DTO 該放在哪？
 若DTO與UseCase的Command欄位完全相同，則可不必轉換，直接將Command當作DTO使用，直接將Application Layer與Adapter Layer耦合，避免代碼冗余。
-若需要建立則在internal/dto下建立，供Adapter Layer使用。
+若需要建立DTO(以HTTP Controller為例)則建議建立在adapter/port_in/http/dto下，供Adapter Layer使用。由於DTO是供給外部服務做格式轉換來
+與核心服務溝通，所以internal核心服務並不會知道DTO的存在。
 ```go
 func (c CommentController) Create(ctx *gin.Context) {
     newCtx, span := tracing.HttpSpanFactory(c.TracerProvider, ctx, pkg)
