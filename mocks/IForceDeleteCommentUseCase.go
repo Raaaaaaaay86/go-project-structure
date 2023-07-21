@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	comment "github.com/raaaaaaaay86/go-project-structure/domain/context/media/comment"
+	comment "github.com/raaaaaaaay86/go-project-structure/internal/context/media/comment"
 
 	mock "github.com/stretchr/testify/mock"
 )

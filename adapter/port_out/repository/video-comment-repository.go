@@ -2,9 +2,9 @@ package repository
 
 import (
 	"context"
-	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
-	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
-	"github.com/raaaaaaaay86/go-project-structure/domain/repository"
+	"github.com/raaaaaaaay86/go-project-structure/internal/entity"
+	"github.com/raaaaaaaay86/go-project-structure/internal/exception"
+	"github.com/raaaaaaaay86/go-project-structure/internal/repository"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

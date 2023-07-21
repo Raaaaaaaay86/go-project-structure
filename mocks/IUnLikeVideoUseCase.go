@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	video "github.com/raaaaaaaay86/go-project-structure/domain/context/media/video"
+	video "github.com/raaaaaaaay86/go-project-structure/internal/context/media/video"
 	mock "github.com/stretchr/testify/mock"
 )
 

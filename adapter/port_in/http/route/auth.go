@@ -2,7 +2,7 @@ package route
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/raaaaaaaay86/go-project-structure/domain/context/auth"
+	"github.com/raaaaaaaay86/go-project-structure/internal/context/auth"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/res"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"go.opentelemetry.io/otel/sdk/trace"

@@ -2,8 +2,8 @@ package route
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/raaaaaaaay86/go-project-structure/domain/context/media/comment"
-	"github.com/raaaaaaaay86/go-project-structure/domain/exception"
+	"github.com/raaaaaaaay86/go-project-structure/internal/context/media/comment"
+	"github.com/raaaaaaaay86/go-project-structure/internal/exception"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/jwt"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/res"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"

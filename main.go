@@ -7,9 +7,9 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/adapter/port_in/http/route"
 	mongodb "github.com/raaaaaaaay86/go-project-structure/adapter/port_out/repository"
 	_ "github.com/raaaaaaaay86/go-project-structure/docs" //nolint:typecheck
-	"github.com/raaaaaaaay86/go-project-structure/domain/context/auth"
-	"github.com/raaaaaaaay86/go-project-structure/domain/context/media/comment"
-	"github.com/raaaaaaaay86/go-project-structure/domain/context/media/video"
+	"github.com/raaaaaaaay86/go-project-structure/internal/context/auth"
+	"github.com/raaaaaaaay86/go-project-structure/internal/context/media/comment"
+	"github.com/raaaaaaaay86/go-project-structure/internal/context/media/video"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/bucket"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/configs"
 	convert "github.com/raaaaaaaay86/go-project-structure/pkg/convert/video"

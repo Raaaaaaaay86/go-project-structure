@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	auth "github.com/raaaaaaaay86/go-project-structure/domain/context/auth"
+	auth "github.com/raaaaaaaay86/go-project-structure/internal/context/auth"
 
 	mock "github.com/stretchr/testify/mock"
 )

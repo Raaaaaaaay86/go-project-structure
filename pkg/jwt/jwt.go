@@ -2,8 +2,8 @@ package jwt
 
 import (
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/raaaaaaaay86/go-project-structure/domain/entity"
-	"github.com/raaaaaaaay86/go-project-structure/domain/vo/enum/role"
+	"github.com/raaaaaaaay86/go-project-structure/internal/entity"
+	"github.com/raaaaaaaay86/go-project-structure/internal/vo/enum/role"
 	"strconv"
 	"time"
 )
