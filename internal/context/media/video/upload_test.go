@@ -91,7 +91,7 @@ func TestVideoUploadUseCase_Execute(t *testing.T) {
 
 			uploader.On("Upload", cmd.File, cmd.FileName).Return(expectedResult, nil).Once()
 			ffmpeg.On("Convert", mock.Anything, mock.Anything).Return(nil).Once()
-		case exception.InvalidInputError{}, exception.ErrEmptyFile:
+		case exception.InvalidInputError{}:
 		}
 
 		ctx := context.Background()
