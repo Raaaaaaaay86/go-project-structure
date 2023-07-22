@@ -29,6 +29,7 @@ make run
 ```
 或是
 ```shell
+bash ./scripts/setup.sh
 docker-compose up -d
 migrate -path migration/postgres -database "postgres://root:123456@localhost:5432/$(DB_SCHEMA)?sslmode=disable" -verbose up
 go run main.go
