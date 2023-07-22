@@ -40,7 +40,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/auth.RegisterUserCommand"
+                            "$ref": "#/definitions/auth.LoginUserCommand"
                         }
                     }
                 ],
@@ -48,7 +48,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/auth.RegisterUserResponse"
+                            "$ref": "#/definitions/auth.LoginUserResponse"
                         }
                     }
                 }
@@ -273,6 +273,82 @@ const docTemplate = `{
                 }
             }
         },
+        "/video/api/v1/like": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "video"
+                ],
+                "summary": "Like video by user.",
+                "parameters": [
+                    {
+                        "description": "request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/video.LikeVideoCommand"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/video.LikeVideoResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/video/api/v1/unlike": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "video"
+                ],
+                "summary": "Unlike video by user.",
+                "parameters": [
+                    {
+                        "description": "request body",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/video.UnLikeVideoCommand"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/video.UnLikeVideoResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/video/api/v1/video/upload": {
             "post": {
                 "security": [
@@ -313,6 +389,27 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "auth.LoginUserCommand": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "example": "password"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "username01"
+                }
+            }
+        },
+        "auth.LoginUserResponse": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
         "auth.RegisterUserCommand": {
             "type": "object",
             "properties": {
@@ -439,6 +536,34 @@ const docTemplate = `{
             }
         },
         "video.CreateVideoResponse": {
+            "type": "object"
+        },
+        "video.LikeVideoCommand": {
+            "type": "object",
+            "properties": {
+                "userId": {
+                    "type": "integer"
+                },
+                "videoId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "video.LikeVideoResponse": {
+            "type": "object"
+        },
+        "video.UnLikeVideoCommand": {
+            "type": "object",
+            "properties": {
+                "userId": {
+                    "type": "integer"
+                },
+                "videoId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "video.UnLikeVideoResponse": {
             "type": "object"
         },
         "video.UploadVideoCommand": {

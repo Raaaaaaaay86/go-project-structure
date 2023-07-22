@@ -128,6 +128,14 @@ func (v VideoController) Create(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, res.Success(response))
 }
 
+// @Summary	Like video by user.
+// @Tags		video
+// @Accept		json
+// @Produce	json
+// @Param		request	body		video.LikeVideoCommand	true	"request body"
+// @Success	200		{object}	video.LikeVideoResponse
+// @Router		/video/api/v1/like [post]
+// @Security	BearerAuth
 func (v VideoController) LikeVideo(ctx *gin.Context) {
 	newCtx, span := tracing.HttpSpanFactory(v.TracerProvider, ctx, pkg)
 	defer span.End()
@@ -158,6 +166,14 @@ func (v VideoController) LikeVideo(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, res.Success(response))
 }
 
+// @Summary	Unlike video by user.
+// @Tags		video
+// @Accept		json
+// @Produce	json
+// @Param		request	body		video.UnLikeVideoCommand	true	"request body"
+// @Success	200		{object}	video.UnLikeVideoResponse
+// @Router		/video/api/v1/unlike [post]
+// @Security	BearerAuth
 func (v VideoController) UnLikeVideo(ctx *gin.Context) {
 	newCtx, span := tracing.HttpSpanFactory(v.TracerProvider, ctx, pkg)
 	defer span.End()

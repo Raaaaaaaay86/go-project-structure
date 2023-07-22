@@ -1,4 +1,18 @@
 definitions:
+  auth.LoginUserCommand:
+    properties:
+      password:
+        example: password
+        type: string
+      username:
+        example: username01
+        type: string
+    type: object
+  auth.LoginUserResponse:
+    properties:
+      token:
+        type: string
+    type: object
   auth.RegisterUserCommand:
     properties:
       email:
@@ -82,6 +96,24 @@ definitions:
     type: object
   video.CreateVideoResponse:
     type: object
+  video.LikeVideoCommand:
+    properties:
+      userId:
+        type: integer
+      videoId:
+        type: integer
+    type: object
+  video.LikeVideoResponse:
+    type: object
+  video.UnLikeVideoCommand:
+    properties:
+      userId:
+        type: integer
+      videoId:
+        type: integer
+    type: object
+  video.UnLikeVideoResponse:
+    type: object
   video.UploadVideoCommand:
     properties:
       uploaderId:
@@ -105,14 +137,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/auth.RegisterUserCommand'
+          $ref: '#/definitions/auth.LoginUserCommand'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/auth.RegisterUserResponse'
+            $ref: '#/definitions/auth.LoginUserResponse'
       security:
       - BearerAuth: []
       summary: Login and get token.
@@ -250,6 +282,52 @@ paths:
       - BearerAuth: []
       summary: Create video post. This API is called after the video upload. Should
         bring the uploaded video uuid in the request.
+      tags:
+      - video
+  /video/api/v1/like:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/video.LikeVideoCommand'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/video.LikeVideoResponse'
+      security:
+      - BearerAuth: []
+      summary: Like video by user.
+      tags:
+      - video
+  /video/api/v1/unlike:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: request body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/video.UnLikeVideoCommand'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/video.UnLikeVideoResponse'
+      security:
+      - BearerAuth: []
+      summary: Unlike video by user.
       tags:
       - video
   /video/api/v1/video/upload:

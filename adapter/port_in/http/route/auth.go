@@ -64,8 +64,8 @@ func (a AuthenticationController) Register(ctx *gin.Context) {
 // @Tags		auth
 // @Accept		json
 // @Produce	json
-// @Param		request	body		auth.RegisterUserCommand	true	"request format"
-// @Success	200		{object}	auth.RegisterUserResponse
+// @Param		request	body		auth.LoginUserCommand	true	"request format"
+// @Success	200		{object}	auth.LoginUserResponse
 // @Router		/v1/auth/login [post]
 // @Security	BearerAuth
 func (a AuthenticationController) Login(ctx *gin.Context) {
