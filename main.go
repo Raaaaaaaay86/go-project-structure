@@ -18,19 +18,27 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/pkg/logger"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/mongo"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
+	"log"
 )
 
 func main() {
-	ctx := context.Background()
+	err := Run(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func Run(ctx context.Context) error {
 	// Config
 	config, err := configs.ReadYaml("./config/app_config.yaml")
 	if err != nil {
-		panic(err)
+		return err
 	}
 
+	// Logger
 	zapLogger, err := logger.NewZapLogger()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer zapLogger.Sync() //nolint:errcheck
 
@@ -58,31 +66,33 @@ func main() {
 	// Neo4j Driver
 	neo4jDriver, err := graphdb.NewNeo4j(ctx, config.Neo4j)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer neo4jDriver.Close(ctx)
 
 	// Postgres Repositories
-	db, err := gorm.NewPostgresConnection(config.Postgres)
+	gormDB, err := gorm.NewPostgresConnection(config.Postgres)
 	if err != nil {
-		panic(err)
+		neo4jDriver.Close(ctx)
+		return err
 	}
-	userRepository := mongodb.NewUserRepository(repositoryTracer, db)
-	videoPostRepository := mongodb.NewVideoPostRepository(repositoryTracer, db, neo4jDriver)
+	userRepository := mongodb.NewUserRepository(repositoryTracer, gormDB)
+	videoPostRepository := mongodb.NewVideoPostRepository(repositoryTracer, gormDB, neo4jDriver)
 
 	// MongoDB Repositories
-	client, err := mongo.NewMongoDbConnection(config.MongoDB)
+	mongoClient, err := mongo.NewMongoDbConnection(config.MongoDB)
 	if err != nil {
-		panic(err)
+		neo4jDriver.Close(ctx)
+		mongoClient.Disconnect(ctx) //nolint:errcheck
+		return err
 	}
-	videoCommentRepository := mongodb.NewVideoCommentRepository(repositoryTracer, client)
+	videoCommentRepository := mongodb.NewVideoCommentRepository(repositoryTracer, mongoClient)
 
 	// Helper Package
 	fileUploader := bucket.NewLocalUploader(config.BucketPath.Raw)
 	ffmpeg := convert.NewFfmpeg(config.BucketPath.Converted)
 
 	// Use Case
-
 	registerUseCase := auth.NewRegisterUserUseCase(appTracer, userRepository)
 	loginUseCase := auth.NewLoginUseCase(appTracer, userRepository)
 	uploadVideoUseCase := video.NewUploadVideoUseCase(appTracer, fileUploader, ffmpeg)
@@ -95,7 +105,6 @@ func main() {
 	unlikeVideoUseCase := video.NewUnLikeVideoUseCase(appTracer, videoPostRepository)
 
 	// HTTP Server
-
 	authController := route.NewAuthenticationController(httpTracer, registerUseCase, loginUseCase)
 	videoController := route.NewVideoController(httpTracer, uploadVideoUseCase, createVideoUseCase, likeVideoUseCase, unlikeVideoUseCase)
 	commentController := route.NewCommentController(httpTracer, createCommentUseCase, findCommentByVideoUseCase, deleteCommentUseCase, forceDeleteCommentUseCase)
@@ -105,6 +114,17 @@ func main() {
 		NewHttpServer(authController, videoController, commentController).
 		Run(httpPort)
 	if err != nil {
-		panic(err)
+		neo4jDriver.Close(ctx)
+		mongoClient.Disconnect(ctx) //nolint:errcheck
+
+		if db, err := gormDB.DB(); err != nil {
+			return err
+		} else {
+			db.Close()
+		}
+
+		return err
 	}
+
+	return nil
 }
