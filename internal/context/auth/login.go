@@ -19,9 +19,26 @@ type LoginUserCommand struct {
 }
 
 func (c LoginUserCommand) Validate() error {
-	if len(c.Username) <= 0 || len(c.DecryptedPassword) <= 0 {
-		return exception.ErrEmptyInput
+	validations := []struct {
+		ValidatedResult bool
+		Err             func() error
+	}{
+		{
+			ValidatedResult: len(c.Username) > 0,
+			Err:             func() error { return exception.NewInvalidInputError("username").ShouldNotEmpty() },
+		},
+		{
+			ValidatedResult: len(c.DecryptedPassword) > 0,
+			Err:             func() error { return exception.NewInvalidInputError("password").ShouldNotEmpty() },
+		},
 	}
+
+	for _, validation := range validations {
+		if !validation.ValidatedResult {
+			return validation.Err()
+		}
+	}
+
 	return nil
 }
 

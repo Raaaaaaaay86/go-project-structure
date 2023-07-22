@@ -45,7 +45,7 @@ func TestFindByVideoCQRS_Execute(t *testing.T) {
 		{
 			TestDescription: "Request by empty VideoId",
 			VideoId:         0,
-			ExpectedError:   exception.ErrEmptyInput,
+			ExpectedError:   exception.NewInvalidInputError("videoId").ShouldNotEmpty(),
 		},
 	}
 
@@ -56,7 +56,7 @@ func TestFindByVideoCQRS_Execute(t *testing.T) {
 		switch tc.ExpectedError {
 		case nil:
 			videoCommentRepository.On("FindByVideoId", mock.Anything, tc.VideoId).Return(tc.ExpectedComments, nil)
-		case exception.ErrEmptyInput:
+		case exception.InvalidInputError{}:
 		}
 
 		useCase := comment.NewFindByVideoUseCase(tracing.NewEmptyTracerProvider(), videoCommentRepository)

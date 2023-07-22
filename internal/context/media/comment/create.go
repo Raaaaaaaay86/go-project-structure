@@ -21,7 +21,7 @@ type CreateCommentCommand struct {
 
 func (c CreateCommentCommand) Validate() error {
 	if c.Comment == "" {
-		return exception.ErrEmptyInput
+		return exception.NewInvalidInputError("comment").ShouldNotEmpty()
 	}
 	return nil
 }

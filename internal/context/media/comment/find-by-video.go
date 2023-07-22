@@ -18,7 +18,7 @@ type FindByVideoQuery struct {
 
 func (f FindByVideoQuery) Validate() error {
 	if f.VideoId == 0 {
-		return exception.ErrEmptyInput
+		return exception.NewInvalidInputError("videoId").ShouldNotEmpty()
 	}
 	return nil
 }

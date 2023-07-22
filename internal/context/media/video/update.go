@@ -21,15 +21,27 @@ type UpdateVideoInfoCommand struct {
 }
 
 func (c UpdateVideoInfoCommand) Validate() error {
-	checkList := []bool{
-		c.UpdaterId != 0,
-		c.VideoId != 0,
-		c.Title != "",
+	validations := []struct {
+		ValidatedResult bool
+		Err             func() error
+	}{
+		{
+			ValidatedResult: c.UpdaterId != 0,
+			Err:             func() error { return exception.NewInvalidInputError("updaterId").ShouldNotEmpty() },
+		},
+		{
+			ValidatedResult: c.VideoId != 0,
+			Err:             func() error { return exception.NewInvalidInputError("videoId").ShouldNotEmpty() },
+		},
+		{
+			ValidatedResult: len(c.Title) > 0,
+			Err:             func() error { return exception.NewInvalidInputError("title").ShouldNotEmpty() },
+		},
 	}
 
-	for _, ok := range checkList {
-		if !ok {
-			return exception.ErrEmptyInput
+	for _, validation := range validations {
+		if !validation.ValidatedResult {
+			return validation.Err()
 		}
 	}
 

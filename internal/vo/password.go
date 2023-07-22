@@ -9,7 +9,7 @@ type DecryptedPassword string
 
 func (p DecryptedPassword) Validate() error {
 	conditions := map[error]bool{
-		exception.ErrEmptyInput: len(p) > 0,
+		exception.NewInvalidInputError("password").ShouldNotEmpty(): len(p) > 0,
 	}
 
 	for err, condition := range conditions {

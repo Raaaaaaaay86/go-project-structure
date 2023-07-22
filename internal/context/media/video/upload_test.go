@@ -21,6 +21,7 @@ func TestVideoUploadUseCase_Execute(t *testing.T) {
 		TestDescription string
 		File            io.Reader
 		FileName        string
+		UploaderId      uint
 		ExpectedErr     error
 	}
 
@@ -50,18 +51,21 @@ func TestVideoUploadUseCase_Execute(t *testing.T) {
 			TestDescription: "Failed by empty file",
 			File:            nil,
 			FileName:        "hello.mp4",
-			ExpectedErr:     exception.ErrEmptyFile,
+			UploaderId:      1,
+			ExpectedErr:     exception.NewInvalidInputError("file").ShouldNotEmpty(),
 		},
 		{
 			TestDescription: "Failed by empty file name",
 			File:            createTempFile(),
 			FileName:        "",
-			ExpectedErr:     exception.ErrEmptyInput,
+			UploaderId:      1,
+			ExpectedErr:     exception.NewInvalidInputError("fileName").ShouldNotEmpty(),
 		},
 		{
 			TestDescription: "Success to upload video",
 			File:            createTempFile(),
 			FileName:        "world.mp4",
+			UploaderId:      1,
 			ExpectedErr:     nil,
 		},
 	}
@@ -70,8 +74,9 @@ func TestVideoUploadUseCase_Execute(t *testing.T) {
 		t.Logf("Start Test case[%d] - %s", i, tc.TestDescription)
 
 		cmd := video.UploadVideoCommand{
-			File:     tc.File,
-			FileName: tc.FileName,
+			File:       tc.File,
+			FileName:   tc.FileName,
+			UploaderId: tc.UploaderId,
 		}
 
 		uploader := mocks.NewUploader(t)
@@ -86,7 +91,7 @@ func TestVideoUploadUseCase_Execute(t *testing.T) {
 
 			uploader.On("Upload", cmd.File, cmd.FileName).Return(expectedResult, nil).Once()
 			ffmpeg.On("Convert", mock.Anything, mock.Anything).Return(nil).Once()
-		case exception.ErrEmptyInput, exception.ErrEmptyFile:
+		case exception.InvalidInputError{}, exception.ErrEmptyFile:
 		}
 
 		ctx := context.Background()

@@ -21,9 +21,29 @@ type RegisterUserCommand struct {
 }
 
 func (c RegisterUserCommand) Validate() error {
-	if c.Username == "" || c.DecryptedPassword == "" || c.Email == "" {
-		return exception.ErrEmptyInput
+	validations := []struct {
+		ValidatedResult bool
+		Err             func() error
+	}{
+		{
+			ValidatedResult: len(c.Username) > 0,
+			Err:             func() error { return exception.NewInvalidInputError("username").ShouldNotEmpty() },
+		},
+		{
+			ValidatedResult: len(c.Username) > 0,
+			Err:             func() error { return exception.NewInvalidInputError("password").ShouldNotEmpty() },
+		},
+		{
+			ValidatedResult: len(c.Username) > 0,
+			Err:             func() error { return exception.NewInvalidInputError("email").ShouldNotEmpty() },
+		},
 	}
+	for _, validation := range validations {
+		if !validation.ValidatedResult {
+			return validation.Err()
+		}
+	}
+
 	if err := c.DecryptedPassword.Validate(); err != nil {
 		return err
 	}

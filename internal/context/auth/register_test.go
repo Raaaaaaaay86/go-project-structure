@@ -47,14 +47,14 @@ func TestRegisterUseCase_Execute(t *testing.T) {
 			Username:          "user01",
 			DecryptedPassword: "",
 			Email:             "user01@email.com",
-			ExceptedErr:       exception.ErrEmptyInput,
+			ExceptedErr:       exception.NewInvalidInputError("password").ShouldNotEmpty(),
 		},
 		{
 			TestDescription:   "Failed by empty username",
 			Username:          "",
 			DecryptedPassword: "correctPassword",
 			Email:             "user01@email.com",
-			ExceptedErr:       exception.ErrEmptyInput,
+			ExceptedErr:       exception.NewInvalidInputError("username").ShouldNotEmpty(),
 		},
 	}
 

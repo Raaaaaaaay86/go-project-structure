@@ -20,14 +20,26 @@ type CreateVideoCommand struct {
 }
 
 func (c CreateVideoCommand) Validate() error {
-	if c.AuthorId == 0 {
-		return exception.ErrEmptyInput
+	validations := []struct {
+		ValidatedResult bool
+		Err             func() error
+	}{
+		{
+			ValidatedResult: c.AuthorId != 0,
+			Err:             func() error { return exception.NewInvalidInputError("authorId").ShouldNotEmpty() },
+		},
+		{
+			ValidatedResult: len(c.Title) > 0,
+			Err:             func() error { return exception.NewInvalidInputError("title").ShouldNotEmpty() },
+		},
+		{
+			ValidatedResult: len(c.VideoUUID) > 0,
+			Err:             func() error { return exception.NewInvalidInputError("uuid").ShouldNotEmpty() },
+		},
 	}
-
-	fields := []string{c.Title, c.VideoUUID}
-	for _, field := range fields {
-		if len(field) == 0 {
-			return exception.ErrEmptyInput
+	for _, validation := range validations {
+		if !validation.ValidatedResult {
+			return validation.Err()
 		}
 	}
 	return nil

@@ -41,7 +41,7 @@ func TestVideoCreateCQRS_Execute(t *testing.T) {
 			Author: entity.User{
 				Id: 1,
 			},
-			ExpectedError: exception.ErrEmptyInput,
+			ExpectedError: exception.NewInvalidInputError("uuid").ShouldNotEmpty(),
 		},
 		{
 			TestDescription: "Success to create with empty description",
@@ -61,7 +61,7 @@ func TestVideoCreateCQRS_Execute(t *testing.T) {
 			Author: entity.User{
 				Id: 1,
 			},
-			ExpectedError: exception.ErrEmptyInput,
+			ExpectedError: exception.NewInvalidInputError("title").ShouldNotEmpty(),
 		},
 	}
 
@@ -83,7 +83,7 @@ func TestVideoCreateCQRS_Execute(t *testing.T) {
 
 			post := entity.NewVideoPost(cmd.Title, cmd.Description, cmd.VideoUUID, tc.Author)
 			videoRepository.On("Create", mock.Anything, post).Return(nil).Once()
-		case exception.ErrEmptyInput:
+		case exception.InvalidInputError{}:
 		}
 
 		_, err := video.NewCreateVideoUseCase(tracing.NewEmptyTracerProvider(), videoRepository, userRepository).Execute(context.TODO(), cmd)

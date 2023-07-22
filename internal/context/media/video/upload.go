@@ -21,11 +21,27 @@ type UploadVideoCommand struct {
 }
 
 func (c UploadVideoCommand) Validate() error {
-	if c.File == nil {
-		return exception.ErrEmptyFile
+	validations := []struct {
+		ValidatedResult bool
+		Err             func() error
+	}{
+		{
+			ValidatedResult: c.File != nil,
+			Err:             func() error { return exception.NewInvalidInputError("file").ShouldNotEmpty() },
+		},
+		{
+			ValidatedResult: len(c.FileName) > 0,
+			Err:             func() error { return exception.NewInvalidInputError("fileName").ShouldNotEmpty() },
+		},
+		{
+			ValidatedResult: c.UploaderId > 0,
+			Err:             func() error { return exception.NewInvalidInputError("uploaderId").ShouldNotEmpty() },
+		},
 	}
-	if len(c.FileName) <= 0 {
-		return exception.ErrEmptyInput
+	for _, validation := range validations {
+		if !validation.ValidatedResult {
+			return validation.Err()
+		}
 	}
 	return nil
 }

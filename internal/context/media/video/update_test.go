@@ -31,7 +31,7 @@ func TestUpdateVideoInfoUseCase_Execute(t *testing.T) {
 			UpdateDescription: "New description",
 			UpdaterId:         0,
 			VideoId:           2,
-			ExpectedError:     exception.ErrEmptyInput,
+			ExpectedError:     exception.NewInvalidInputError("updaterId").ShouldNotEmpty(),
 		},
 		{
 			TestDescription:   "Missing VideoId",
@@ -40,7 +40,7 @@ func TestUpdateVideoInfoUseCase_Execute(t *testing.T) {
 			UpdaterId:         1,
 			VideoAuthorId:     1,
 			VideoId:           0,
-			ExpectedError:     exception.ErrEmptyInput,
+			ExpectedError:     exception.NewInvalidInputError("videoId").ShouldNotEmpty(),
 		},
 		{
 			TestDescription:   "Missing Title",
@@ -49,7 +49,7 @@ func TestUpdateVideoInfoUseCase_Execute(t *testing.T) {
 			UpdaterId:         1,
 			VideoAuthorId:     1,
 			VideoId:           2,
-			ExpectedError:     exception.ErrEmptyInput,
+			ExpectedError:     exception.NewInvalidInputError("title").ShouldNotEmpty(),
 		},
 		{
 			TestDescription:   "Update by non-author",
@@ -96,7 +96,7 @@ func TestUpdateVideoInfoUseCase_Execute(t *testing.T) {
 			videoPostRepository.On("Update", mock.Anything, updatedVideo).Return(nil).Once()
 		case exception.ErrUnauthorized:
 			videoPostRepository.On("FindById", mock.Anything, tc.VideoId).Return(oldVideo, nil).Once()
-		case exception.ErrEmptyInput:
+		case exception.InvalidInputError{}:
 		}
 
 		cmd := video.UpdateVideoInfoCommand{

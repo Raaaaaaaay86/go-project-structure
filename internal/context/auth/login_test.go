@@ -31,14 +31,14 @@ func TestLoginCQRS_Execute(t *testing.T) {
 			Username:          "user01",
 			DecryptedPassword: "",
 			UserRole:          role.User,
-			ExpectedErr:       exception.ErrEmptyInput,
+			ExpectedErr:       exception.NewInvalidInputError("password").ShouldNotEmpty(),
 		},
 		{
 			TestDescription:   "Failed by empty username",
 			Username:          "",
 			DecryptedPassword: "correctPassword",
 			UserRole:          role.User,
-			ExpectedErr:       exception.ErrEmptyInput,
+			ExpectedErr:       exception.NewInvalidInputError("username").ShouldNotEmpty(),
 		},
 		{
 			TestDescription:   "Failed by wrong password",
@@ -73,7 +73,7 @@ func TestLoginCQRS_Execute(t *testing.T) {
 			userRepository.On("FindByUsername", mock.Anything, cmd.Username).Return(expectedUser, nil).Once()
 		case exception.ErrUserNotFound:
 			userRepository.On("FindByUsername", mock.Anything, cmd.Username).Return(nil, gorm.ErrRecordNotFound).Once()
-		case exception.ErrEmptyInput:
+		case exception.InvalidInputError{}:
 		}
 
 		tracer := tracing.NewEmptyTracerProvider()

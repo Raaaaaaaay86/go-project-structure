@@ -35,7 +35,7 @@ func TestCreateCommentUseCase_Execute(t *testing.T) {
 			AuthorId:        1,
 			VideoId:         1,
 			Comment:         "",
-			ExpectedError:   exception.ErrEmptyInput,
+			ExpectedError:   exception.NewInvalidInputError("comment").ShouldNotEmpty(),
 		},
 		{
 			TestDescription: "Failed by non-exist author (user id)",
@@ -78,7 +78,7 @@ func TestCreateCommentUseCase_Execute(t *testing.T) {
 			userRepository.On("FindById", mock.Anything, tc.AuthorId).
 				Return(&entity.User{Id: tc.AuthorId}, tc.ExpectedError).
 				Maybe()
-		case exception.ErrEmptyInput:
+		case exception.InvalidInputError{}:
 		}
 
 		cmd := comment.CreateCommentCommand{
@@ -89,7 +89,8 @@ func TestCreateCommentUseCase_Execute(t *testing.T) {
 		useCase := comment.NewCreateCommentUseCase(tracing.NewEmptyTracerProvider(), videoCommentRepository, userRepository, videoPostRepository)
 		response, err := useCase.Execute(context.TODO(), cmd)
 		if err != nil {
-			assert.ErrorIs(t, tc.ExpectedError, err)
+			assert.ErrorAs(t, tc.ExpectedError, &err)
+			assert.Equal(t, tc.ExpectedError.Error(), err.Error())
 			continue
 		}
 
