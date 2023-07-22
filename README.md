@@ -1,4 +1,4 @@
-# Golang乾淨架構實踐 (文件還在寫...)
+# Golang乾淨架構實踐
 
 Go和其他語言相比，在專案架構上並無限制，但是在實際開發中，我們還是需要一個規範，讓專案的架構更加清晰，便於維護和擴展。此範例會以
 乾淨架構(Clean Architecture)為基礎，並且帶入領域驅動開發(Domain Driven Design)的概念來組織專案。  
@@ -21,22 +21,6 @@ Go和其他語言相比，在專案架構上並無限制，但是在實際開發
 - 安裝[Docker](https://www.docker.com/products/docker-desktop/)，使用Docker Compose搭建環境(Postgres, MongoDB...)
 - 安裝[golang-migrate](https://github.com/golang-migrate/migrate)，用來執行資料庫遷移
 - 安裝[FFmpeg](https://ffmpeg.org/download.html)，此專案會使用到FFmpeg來處理影片上傳轉檔案
-```shell
-# 檢查是否成功安裝
-$ ffmpeg -version
-
-ffmpeg version 6.0 Copyright (c) 2000-2023 the FFmpeg developers
-built with Apple clang version 14.0.0 (clang-1400.0.29.202)
-configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/6.0 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gnutls --enable-gpl --enable-libaom --enable-libaribb24 --enable-libbluray --enable-libdav1d --enable-libmp3lame --enable-libopus --enable-librav1e --enable-librist --enable-librubberband --enable-libsnappy --enable-libsrt --enable-libsvtav1 --enable-libtesseract --enable-libtheora --enable-libvidstab --enable-libvmaf --enable-libvorbis --enable-libvpx --enable-libwebp --enable-libx264 --enable-libx265 --enable-libxml2 --enable-libxvid --enable-lzma --enable-libfontconfig --enable-libfreetype --enable-frei0r --enable-libass --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libopenjpeg --enable-libspeex --enable-libsoxr --enable-libzmq --enable-libzimg --disable-libjack --disable-indev=jack --enable-videotoolbox --enable-audiotoolbox --enable-neon
-libavutil      58.  2.100 / 58.  2.100
-libavcodec     60.  3.100 / 60.  3.100
-libavformat    60.  3.100 / 60.  3.100
-libavdevice    60.  1.100 / 60.  1.100
-libavfilter     9.  3.100 /  9.  3.100
-libswscale      7.  1.100 /  7.  1.100
-libswresample   4. 10.100 /  4. 10.100
-libpostproc    57.  1.100 / 57.  1.100
-```
 
 # 啟動專案
 執行終端指令
@@ -142,7 +126,7 @@ type VideoCommentRepository interface {
 }
 ```
 
-## 讀寫分離模式(CQRS)拆分UseCase
+## 讀寫分離模式(CQRS)拆分業務邏輯
 推薦閱讀：[CQRS 命令查詢職責分離模式 Ajay Kumar 著 錢亞宏 譯](https://www.tenlong.com.tw/products/9789864347926)  
 
 將寫入與讀取的行為拆分為獨立的UseCase，藉此維持函式呼叫的冪等性，避免意外的副作用，同時提升寫入和讀取的效率。  
@@ -151,11 +135,11 @@ type VideoCommentRepository interface {
 ```go
 package subdomain
 
-var _ IxxxUseCase = (*xxxUseCase)(nil) // 檢查 xxxUseCase 是否實作 IxxxUseCase 介面
+var _ IxxxUseCase = (*xxxUseCase)(nil) // 在編譯期間檢查 xxxUseCase 是否實作 IxxxUseCase 介面
 
 type xxxCommand struct {
     ParameterA uint
-    RandomEntity  eneity.RandomEntity
+    RandomEntity  entity.RandomEntity
 }
 
 type xxxResponse struct {
@@ -187,7 +171,7 @@ func (uc xxxUseCase) Execute(ctx context.Context, cmd xxxCommand) (*xxxResponse,
 ```
 若為讀取行為的UseCase則將`xxxCommand`改為`xxxQuery`，表達執行一個讀取操作。
 
-## DTO 該放在哪？
+## DTO (Data Transfer Object) 該放在哪？
 若DTO與UseCase的Command欄位完全相同，則可不必轉換，直接將Command當作DTO使用，直接將Application Layer與Adapter Layer耦合，避免代碼冗余。
 若需要建立DTO(以HTTP Controller為例)則建議建立在adapter/port_in/http/dto下，供Adapter Layer使用。由於DTO是供給外部服務做格式轉換來
 與核心服務溝通，所以internal核心服務並不會知道DTO的存在。
@@ -248,5 +232,5 @@ type UserRepository interface {
 ```
 
 ## 組件之間應依賴於介面
-組件之間應依賴於介面，而不是實作。如此才能避免耦合。
+組件之間應盡量依賴於介面，而不是實作。如此才能避免耦合。
 
