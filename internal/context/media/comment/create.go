@@ -20,9 +20,22 @@ type CreateCommentCommand struct {
 }
 
 func (c CreateCommentCommand) Validate() error {
-	if c.Comment == "" {
-		return exception.NewInvalidInputError("comment").ShouldNotEmpty()
+	validations := []struct {
+		ValidatedResult bool
+		Err             func() error
+	}{
+		{
+			ValidatedResult: len(c.Comment) > 0,
+			Err:             func() error { return exception.NewInvalidInputError("comment").ShouldNotEmpty() },
+		},
 	}
+
+	for _, validation := range validations {
+		if !validation.ValidatedResult {
+			return validation.Err()
+		}
+	}
+
 	return nil
 }
 
