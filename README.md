@@ -239,3 +239,85 @@ type UserRepository interface {
 ## 組件之間應依賴於介面
 組件之間應盡量依賴於介面，而不是實作。如此才能避免耦合。
 
+# Live Template (for Goland IDE)
+建議個人或團隊開發使用Live Template來產生代碼提升開發速度，也可避免在開發框架下的代碼風格不一致。
+
+## Interface Implementation Compile-Time Check
+```text
+var _ $INTERFACE$ = (*$STRUCT$)(nil)
+```
+
+## CQRS Command Use Case
+```text
+var _ I$Name$UseCase = (*$NAME$UseCase)(nil)
+
+type $Name$Command struct {
+
+}
+
+type $Name$Response struct {
+
+}
+
+type I$Name$UseCase interface {
+Execute(cmd $Name$Command) (*$Name$Response, error)
+}
+
+type $Name$UseCase struct {
+
+}
+
+func New$Name$UseCase() *$Name$UseCase {
+return &$Name$UseCase{}
+}
+
+func (uc $Name$UseCase) Execute(ctx context.Context, cmd $Name$Command) (*$Name$Response, error) {
+return &$Name$Response{}, nil
+}
+
+```
+
+## CQRS Query Use Case
+```text
+var _ I$Name$UseCase = (*$NAME$UseCase)(nil)
+
+type $Name$Query struct {
+
+}
+
+type $Name$Response struct {
+
+}
+
+type I$Name$UseCase interface {
+Execute(cmd $Name$Query) (*$Name$Response, error)
+}
+
+type $Name$UseCase struct {
+
+}
+
+func New$Name$UseCase() *$Name$UseCase {
+return &$Name$UseCase{}
+}
+
+func (uc $Name$UseCase) Execute(ctx context.Context, cmd $Name$Query) (*$Name$Response, error) {
+return &$Name$Response{}, nil
+}
+```
+
+## Table-Driven Unit Test
+```text
+func Test$FUNC_NAME$(t *testing.T) {
+    type $NAME$TestCase struct {
+        TestDescription string
+    }
+
+    testCases := []$NAME$TestCase{
+    }
+
+    for i, tc := range testCases {
+        t.Logf("Test case [%d]: %s", i, tc.TestDescription)
+    }
+}
+```
