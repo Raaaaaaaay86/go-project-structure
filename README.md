@@ -41,12 +41,16 @@ go run main.go
 乾淨架構主要分為三層，依序由核心到外部為Domain Layer、Application Layer、Adapter Layer。每層之間皆以介面(Interface)
 做依賴注入(Dependency Injection)， 來達成解耦。
 
-## Domain Layer
-Domain Layer是專案的核心，主要負責專案的業務邏輯，並且不依賴任何外部服務，例如資料庫、HTTP等等。通常以Entity、Aggregate組成。
-## Application Layer
-Application Layer是Domain Layer的橋樑，負責將Domain Layer的業務邏輯透過Interface暴露外部。通常以UseCase、Repository(Interface)組成。
-## Adapter Layer
-Adapter Layer負責將外部的請求轉換成Application Layer的輸入(e.g. HTTP, gRPC等請求)，或將Application Layer的輸出轉換成外部的輸出(e.g. 存取資料庫, 請求外部服務)。
+- **Domain Layer**:  
+是專案的核心，主要負責專案的業務邏輯，並且不依賴任何外部服務，例如資料庫、HTTP等等。通常以Entity、Aggregate組成。  
+  
+
+- **Application Layer**:  
+是Domain Layer的橋樑，負責將Domain Layer的業務邏輯透過Interface暴露外部。通常以UseCase、Repository(Interface)組成。  
+  
+
+- **Adapter Layer**:  
+負責將外部的請求轉換成Application Layer的輸入(e.g. HTTP, gRPC等請求)，或將Application Layer的輸出轉換成外部的輸出(e.g. 存取資料庫, 請求外部服務)。
 
 # 資料夾結構
 ```text
