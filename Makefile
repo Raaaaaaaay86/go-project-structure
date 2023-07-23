@@ -8,7 +8,7 @@ run:
 	bash ./scripts/setup.sh
 	docker-compose up -d
 	migrate -path migration/postgres -database "postgres://root:123456@localhost:5432/$(DB_SCHEMA)?sslmode=disable" -verbose up
-	go run main.go
+	go run .
 swag_init:
 	swag init --generalInfo ./adapter/port_in/http/gin.go
 
