@@ -13,10 +13,14 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/internal/context/media/comment"
 	"github.com/raaaaaaaay86/go-project-structure/internal/context/media/video"
 	"github.com/raaaaaaaay86/go-project-structure/pkg"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/configs"
+	"go.uber.org/zap"
 )
 
 type Application struct {
-	HttpServer *gin.Engine
+	GinEngine *gin.Engine
+	Config    *configs.YamlConfig
+	ZapLogger *zap.SugaredLogger
 }
 
 func App() (*Application, error) {

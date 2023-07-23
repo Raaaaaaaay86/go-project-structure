@@ -19,8 +19,10 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/pkg/convert/video"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/gorm"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/graphdb"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/logger"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/mongo"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
+	"go.uber.org/zap"
 )
 
 import (
@@ -81,8 +83,14 @@ func App() (*Application, error) {
 	forceDeleteCommentUseCase := comment.NewForceDeleteCommentUseCase(applicationTracer, videoCommentRepository)
 	commentController := route.NewCommentController(httpTracer, createCommentUseCase, findByVideoUseCase, deleteCommentUseCase, forceDeleteCommentUseCase)
 	engine := http.NewHttpServer(authenticationController, videoController, commentController)
+	sugaredLogger, err := logger.NewZapLogger()
+	if err != nil {
+		return nil, err
+	}
 	application := &Application{
-		HttpServer: engine,
+		GinEngine: engine,
+		Config:    yamlConfig,
+		ZapLogger: sugaredLogger,
 	}
 	return application, nil
 }
@@ -90,5 +98,7 @@ func App() (*Application, error) {
 // wire.go:
 
 type Application struct {
-	HttpServer *gin.Engine
+	GinEngine *gin.Engine
+	Config    *configs.YamlConfig
+	ZapLogger *zap.SugaredLogger
 }
