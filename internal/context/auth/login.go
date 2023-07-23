@@ -8,7 +8,6 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/pkg/jwt"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
-	"time"
 )
 
 var _ validate.Validator = (*LoginUserCommand)(nil)
@@ -72,8 +71,6 @@ func (c LoginUserUseCase) Execute(ctx context.Context, cmd LoginUserCommand) (*L
 	if err != nil {
 		return nil, err
 	}
-
-	time.Sleep(10 * time.Second)
 
 	user, err := c.UserRepository.FindByUsername(newCtx, cmd.Username)
 	if err != nil {
