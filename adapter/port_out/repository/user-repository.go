@@ -5,7 +5,6 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/internal/entity"
 	"github.com/raaaaaaaay86/go-project-structure/internal/repository"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
-	"go.opentelemetry.io/otel/sdk/trace"
 	"gorm.io/gorm"
 )
 
@@ -13,10 +12,10 @@ var _ repository.UserRepository = (*UserRepository)(nil)
 
 type UserRepository struct {
 	DB             *gorm.DB
-	TracerProvider *trace.TracerProvider
+	TracerProvider tracing.RepositoryTracer
 }
 
-func NewUserRepository(tracerProvider *trace.TracerProvider, db *gorm.DB) *UserRepository {
+func NewUserRepository(tracerProvider tracing.RepositoryTracer, db *gorm.DB) *UserRepository {
 	return &UserRepository{
 		DB:             db,
 		TracerProvider: tracerProvider,

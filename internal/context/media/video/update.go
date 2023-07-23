@@ -7,7 +7,6 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/internal/repository"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
-	"go.opentelemetry.io/otel/sdk/trace"
 	"gorm.io/gorm"
 )
 
@@ -61,10 +60,10 @@ var _ IUpdateVideoInfoUseCase = (*UpdateVideoInfoUseCase)(nil)
 type UpdateVideoInfoUseCase struct {
 	VideoPostRepository repository.VideoPostRepository
 	DB                  *gorm.DB
-	TracerProvider      *trace.TracerProvider
+	TracerProvider      tracing.ApplicationTracer
 }
 
-func NewUpdateVideoInfoUseCase(tracerProvider *trace.TracerProvider, videoPostRepository repository.VideoPostRepository, DB *gorm.DB) *UpdateVideoInfoUseCase {
+func NewUpdateVideoInfoUseCase(tracerProvider tracing.ApplicationTracer, videoPostRepository repository.VideoPostRepository, DB *gorm.DB) *UpdateVideoInfoUseCase {
 	return &UpdateVideoInfoUseCase{
 		VideoPostRepository: videoPostRepository,
 		DB:                  DB,

@@ -7,14 +7,14 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewPostgresConnection(c configs.Postgres) (*gorm.DB, error) {
+func NewPostgresConnection(c *configs.YamlConfig) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Taipei",
-		c.Host,
-		c.User,
-		c.Password,
-		c.Schema,
-		c.Port,
+		c.Postgres.Host,
+		c.Postgres.User,
+		c.Postgres.Password,
+		c.Postgres.Schema,
+		c.Postgres.Port,
 	)
 	postgresConfig := postgres.Config{
 		DSN: dsn,

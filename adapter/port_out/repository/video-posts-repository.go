@@ -6,7 +6,6 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/internal/entity"
 	"github.com/raaaaaaaay86/go-project-structure/internal/repository"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
-	"go.opentelemetry.io/otel/sdk/trace"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -16,10 +15,10 @@ var _ repository.VideoPostRepository = (*VideoPostRepository)(nil)
 type VideoPostRepository struct {
 	DB             *gorm.DB
 	GraphDB        neo4j.DriverWithContext
-	TracerProvider *trace.TracerProvider
+	TracerProvider tracing.RepositoryTracer
 }
 
-func NewVideoPostRepository(tracerProvider *trace.TracerProvider, DB *gorm.DB, graphDB neo4j.DriverWithContext) *VideoPostRepository {
+func NewVideoPostRepository(tracerProvider tracing.RepositoryTracer, DB *gorm.DB, graphDB neo4j.DriverWithContext) *VideoPostRepository {
 	return &VideoPostRepository{
 		DB:             DB,
 		GraphDB:        graphDB,

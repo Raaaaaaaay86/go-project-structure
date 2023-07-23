@@ -9,7 +9,6 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/internal/vo/enum/role"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
-	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 var _ validate.Validator = (*RegisterUserCommand)(nil)
@@ -66,10 +65,10 @@ var _ IRegisterUserUseCase = (*RegisterUserUseCase)(nil)
 
 type RegisterUserUseCase struct {
 	userRepository repository.UserRepository
-	TracerProvider *trace.TracerProvider
+	TracerProvider tracing.ApplicationTracer
 }
 
-func NewRegisterUserUseCase(tracerProvider *trace.TracerProvider, userRepository repository.UserRepository) *RegisterUserUseCase {
+func NewRegisterUserUseCase(tracerProvider tracing.ApplicationTracer, userRepository repository.UserRepository) *RegisterUserUseCase {
 	return &RegisterUserUseCase{
 		userRepository: userRepository,
 		TracerProvider: tracerProvider,

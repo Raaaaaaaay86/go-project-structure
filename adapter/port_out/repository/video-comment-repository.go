@@ -9,17 +9,16 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 var _ repository.VideoCommentRepository = (*VideoCommentRepository)(nil)
 
 type VideoCommentRepository struct {
 	Client         *mongo.Client
-	TracerProvider *trace.TracerProvider
+	TracerProvider tracing.RepositoryTracer
 }
 
-func NewVideoCommentRepository(tracerProvider *trace.TracerProvider, client *mongo.Client) *VideoCommentRepository {
+func NewVideoCommentRepository(tracerProvider tracing.RepositoryTracer, client *mongo.Client) *VideoCommentRepository {
 	return &VideoCommentRepository{
 		Client:         client,
 		TracerProvider: tracerProvider,

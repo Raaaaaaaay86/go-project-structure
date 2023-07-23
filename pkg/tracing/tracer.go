@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/configs"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
@@ -30,8 +31,8 @@ func newStdOutExporter() (*stdouttrace.Exporter, error) {
 	)
 }
 
-func NewJaegerExporter(endpoint string) (*jaeger.Exporter, error) {
-	return jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(endpoint)))
+func NewJaegerExporter(config *configs.YamlConfig) (*jaeger.Exporter, error) {
+	return jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(config.Jaeger.Endpoint)))
 }
 
 func NewStdOutTracerProvider(serviceName string) *traceSdk.TracerProvider {
@@ -54,7 +55,7 @@ func NewEmptyTracerProvider() *traceSdk.TracerProvider {
 	return traceSdk.NewTracerProvider(traceSdk.WithResource(traceResource))
 }
 
-func NewJaegerTracerProvider(serviceName string, exporter *jaeger.Exporter) (*traceSdk.TracerProvider, error) {
+func NewJaegerTracerProvider(serviceName string, exporter *jaeger.Exporter) (trace.TracerProvider, error) {
 	traceResource, err := newTraceResource(serviceName)
 	if err != nil {
 		return nil, err
@@ -63,7 +64,25 @@ func NewJaegerTracerProvider(serviceName string, exporter *jaeger.Exporter) (*tr
 	return traceSdk.NewTracerProvider(traceSdk.WithResource(traceResource), traceSdk.WithBatcher(exporter)), nil
 }
 
-func HttpSpanFactory(tracerProvider *traceSdk.TracerProvider, ctx *gin.Context, fullPackage string) (context.Context, trace.Span) {
+type ApplicationTracer trace.TracerProvider
+
+func NewApplicationTracer(exporter *jaeger.Exporter) (ApplicationTracer, error) {
+	return NewJaegerTracerProvider("application", exporter)
+}
+
+type RepositoryTracer trace.TracerProvider
+
+func NewRepositoryTracer(exporter *jaeger.Exporter) (RepositoryTracer, error) {
+	return NewJaegerTracerProvider("repository", exporter)
+}
+
+type HttpTracer trace.TracerProvider
+
+func NewHttpTracer(exporter *jaeger.Exporter) (HttpTracer, error) {
+	return NewJaegerTracerProvider("http", exporter)
+}
+
+func HttpSpanFactory(tracerProvider trace.TracerProvider, ctx *gin.Context, fullPackage string) (context.Context, trace.Span) {
 	return tracerProvider.Tracer(fullPackage).Start(ctx, fmt.Sprintf("%s %s", ctx.Request.Method, ctx.Request.URL.Path))
 }
 
@@ -72,10 +91,10 @@ func RecordHttpError(span trace.Span, code int, err error) {
 	span.SetAttributes(attribute.Int("http.status_code", code))
 }
 
-func ApplicationSpanFactory(tracerProvider *traceSdk.TracerProvider, ctx context.Context, fullPackage string, method string) (context.Context, trace.Span) {
+func ApplicationSpanFactory(tracerProvider trace.TracerProvider, ctx context.Context, fullPackage string, method string) (context.Context, trace.Span) {
 	return tracerProvider.Tracer(fullPackage).Start(ctx, method)
 }
 
-func RepositorySpanFactory(tracerProvider *traceSdk.TracerProvider, ctx context.Context, fullPackage string, method string) (context.Context, trace.Span) {
+func RepositorySpanFactory(tracerProvider trace.TracerProvider, ctx context.Context, fullPackage string, method string) (context.Context, trace.Span) {
 	return tracerProvider.Tracer(fullPackage).Start(ctx, method)
 }

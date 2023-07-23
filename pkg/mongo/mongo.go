@@ -8,13 +8,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func NewMongoDbConnection(c configs.Mongo) (*mongo.Client, error) {
+func NewMongoDbConnection(c *configs.YamlConfig) (*mongo.Client, error) {
 	uri := fmt.Sprintf(
 		"mongodb://%s:%s@%s:%d/?authMechanism=SCRAM-SHA-256&tls=false",
-		c.User,
-		c.Password,
-		c.Host,
-		c.Port,
+		c.MongoDB.User,
+		c.MongoDB.Password,
+		c.MongoDB.Host,
+		c.MongoDB.Port,
 	)
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {

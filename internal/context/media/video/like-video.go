@@ -3,7 +3,7 @@ package video
 import (
 	"context"
 	"github.com/raaaaaaaay86/go-project-structure/internal/repository"
-	"go.opentelemetry.io/otel/sdk/trace"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 )
 
 type LikeVideoCommand struct {
@@ -22,10 +22,10 @@ var _ ILikeVideoUseCase = (*LikeVideoUseCase)(nil)
 
 type LikeVideoUseCase struct {
 	VideoPostRepository repository.VideoPostRepository
-	TracerProvider      *trace.TracerProvider
+	TracerProvider      tracing.ApplicationTracer
 }
 
-func NewLikeVideoUseCase(tracerProvider *trace.TracerProvider, videoPostRepository repository.VideoPostRepository) *LikeVideoUseCase {
+func NewLikeVideoUseCase(tracerProvider tracing.ApplicationTracer, videoPostRepository repository.VideoPostRepository) *LikeVideoUseCase {
 	return &LikeVideoUseCase{
 		VideoPostRepository: videoPostRepository,
 		TracerProvider:      tracerProvider,

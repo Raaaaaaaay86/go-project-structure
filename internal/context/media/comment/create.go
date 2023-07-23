@@ -7,7 +7,6 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/internal/repository"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
-	"go.opentelemetry.io/otel/sdk/trace"
 	"time"
 )
 
@@ -53,10 +52,10 @@ type CreateCommentUseCase struct {
 	VideoCommentRepo    repository.VideoCommentRepository
 	UserRepository      repository.UserRepository
 	VideoPostRepository repository.VideoPostRepository
-	TracerProvider      *trace.TracerProvider
+	TracerProvider      tracing.ApplicationTracer
 }
 
-func NewCreateCommentUseCase(tracerProvider *trace.TracerProvider, videoCommentRepo repository.VideoCommentRepository, userRepository repository.UserRepository, postRepository repository.VideoPostRepository) *CreateCommentUseCase {
+func NewCreateCommentUseCase(tracerProvider tracing.ApplicationTracer, videoCommentRepo repository.VideoCommentRepository, userRepository repository.UserRepository, postRepository repository.VideoPostRepository) *CreateCommentUseCase {
 	return &CreateCommentUseCase{
 		VideoCommentRepo:    videoCommentRepo,
 		UserRepository:      userRepository,

@@ -8,7 +8,6 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/pkg/jwt"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
-	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 var _ validate.Validator = (*LoginUserCommand)(nil)
@@ -46,18 +45,18 @@ type LoginUserResponse struct {
 	Token string `json:"token,omitempty"`
 }
 
-type ILoginUserResponse interface {
+type ILoginUserUseCase interface {
 	Execute(ctx context.Context, cmd LoginUserCommand) (*LoginUserResponse, error)
 }
 
-var _ ILoginUserResponse = (*LoginUserUseCase)(nil)
+var _ ILoginUserUseCase = (*LoginUserUseCase)(nil)
 
 type LoginUserUseCase struct {
 	UserRepository repository.UserRepository
-	TracerProvider *trace.TracerProvider
+	TracerProvider tracing.ApplicationTracer
 }
 
-func NewLoginUseCase(tracer *trace.TracerProvider, userRepository repository.UserRepository) *LoginUserUseCase {
+func NewLoginUseCase(tracer tracing.ApplicationTracer, userRepository repository.UserRepository) *LoginUserUseCase {
 	return &LoginUserUseCase{
 		UserRepository: userRepository,
 		TracerProvider: tracer,

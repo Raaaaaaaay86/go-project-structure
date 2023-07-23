@@ -7,7 +7,7 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/pkg/jwt"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/res"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
-	"go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
 	"net/http"
 )
 
@@ -23,13 +23,13 @@ type VideoController struct {
 	CreateVideoUseCase video.ICreateVideoUseCase
 	LikeVideoUseCase   video.ILikeVideoUseCase
 	UnLikeVideoUseCase video.IUnLikeVideoUseCase
-	TracerProvider     *trace.TracerProvider
+	TracerProvider     trace.TracerProvider
 }
 
 var _ IVideoController = (*VideoController)(nil)
 
 func NewVideoController(
-	tracerProvider *trace.TracerProvider,
+	tracerProvider tracing.HttpTracer,
 	upload video.IUploadVideoUseCase,
 	create video.ICreateVideoUseCase,
 	like video.ILikeVideoUseCase,

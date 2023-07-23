@@ -7,7 +7,7 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/pkg/jwt"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/res"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
-	"go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
 	"net/http"
 )
 
@@ -25,10 +25,10 @@ type CommentController struct {
 	FindByVideoIdUseCase       comment.IFindByVideoUseCase
 	DeleteCommentUseCase       comment.IDeleteCommentUseCase
 	ForceDeleteCommentUserCase comment.IForceDeleteCommentUseCase
-	TracerProvider             *trace.TracerProvider
+	TracerProvider             trace.TracerProvider
 }
 
-func NewCommentController(tracerProvider *trace.TracerProvider, createCommentUseCase comment.ICreateCommentUseCase, findByVideoUseCase comment.IFindByVideoUseCase, deleteCommentUseCase comment.IDeleteCommentUseCase, forceDeleteUseCase comment.IForceDeleteCommentUseCase) *CommentController {
+func NewCommentController(tracerProvider tracing.HttpTracer, createCommentUseCase comment.ICreateCommentUseCase, findByVideoUseCase comment.IFindByVideoUseCase, deleteCommentUseCase comment.IDeleteCommentUseCase, forceDeleteUseCase comment.IForceDeleteCommentUseCase) *CommentController {
 	return &CommentController{
 		CreateUseCase:              createCommentUseCase,
 		FindByVideoIdUseCase:       findByVideoUseCase,

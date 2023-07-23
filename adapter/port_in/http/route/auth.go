@@ -5,7 +5,7 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/internal/context/auth"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/res"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
-	"go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
 	"net/http"
 )
 
@@ -18,12 +18,12 @@ var _ IAuthenticationController = (*AuthenticationController)(nil)
 
 type AuthenticationController struct {
 	RegisterUseCase auth.IRegisterUserUseCase
-	LoginUseCase    auth.ILoginUserResponse
-	TracerProvider  *trace.TracerProvider
+	LoginUseCase    auth.ILoginUserUseCase
+	TracerProvider  trace.TracerProvider
 }
 
-func NewAuthenticationController(tracerProvider *trace.TracerProvider, registerUseCase auth.IRegisterUserUseCase, loginUseCase auth.ILoginUserResponse) AuthenticationController {
-	return AuthenticationController{
+func NewAuthenticationController(tracerProvider tracing.HttpTracer, registerUseCase auth.IRegisterUserUseCase, loginUseCase auth.ILoginUserUseCase) *AuthenticationController {
+	return &AuthenticationController{
 		RegisterUseCase: registerUseCase,
 		LoginUseCase:    loginUseCase,
 		TracerProvider:  tracerProvider,

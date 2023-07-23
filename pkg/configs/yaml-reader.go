@@ -62,3 +62,7 @@ func ReadYaml(path string) (*YamlConfig, error) {
 
 	return &config, nil
 }
+
+func YamlConfigProvider() (*YamlConfig, error) {
+	return ReadYaml("./config/app_config.yaml")
+}

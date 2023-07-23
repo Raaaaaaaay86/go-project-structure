@@ -6,7 +6,6 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/internal/vo/enum/role"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 type DeleteCommentCommand struct {
@@ -26,10 +25,10 @@ var _ IDeleteCommentUseCase = (*DeleteCommentUseCase)(nil)
 
 type DeleteCommentUseCase struct {
 	VideoCommentRepository repository.VideoCommentRepository
-	TracerProvider         *trace.TracerProvider
+	TracerProvider         tracing.ApplicationTracer
 }
 
-func NewDeleteCommentUseCase(tracerProvider *trace.TracerProvider, videoCommentRepository repository.VideoCommentRepository) *DeleteCommentUseCase {
+func NewDeleteCommentUseCase(tracerProvider tracing.ApplicationTracer, videoCommentRepository repository.VideoCommentRepository) *DeleteCommentUseCase {
 	return &DeleteCommentUseCase{
 		VideoCommentRepository: videoCommentRepository,
 		TracerProvider:         tracerProvider,

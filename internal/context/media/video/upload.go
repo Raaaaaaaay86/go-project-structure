@@ -8,7 +8,6 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/pkg/convert/video"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
-	"go.opentelemetry.io/otel/sdk/trace"
 	"io"
 )
 
@@ -59,10 +58,10 @@ var _ IUploadVideoUseCase = (*UploadVideoUseCase)(nil)
 type UploadVideoUseCase struct {
 	FileUploader   bucket.Uploader
 	Ffmpeg         convert.IFfmpeg
-	TracerProvider *trace.TracerProvider
+	TracerProvider tracing.ApplicationTracer
 }
 
-func NewUploadVideoUseCase(tracerProvider *trace.TracerProvider, fileUploader bucket.Uploader, ffmpeg convert.IFfmpeg) *UploadVideoUseCase {
+func NewUploadVideoUseCase(tracerProvider tracing.ApplicationTracer, fileUploader bucket.Uploader, ffmpeg convert.IFfmpeg) *UploadVideoUseCase {
 	return &UploadVideoUseCase{
 		FileUploader:   fileUploader,
 		Ffmpeg:         ffmpeg,

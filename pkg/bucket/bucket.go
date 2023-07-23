@@ -2,6 +2,7 @@ package bucket
 
 import (
 	"fmt"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/configs"
 	"io"
 	"os"
 	"strings"
@@ -21,9 +22,9 @@ type LocalUploader struct {
 	BucketPath string
 }
 
-func NewLocalUploader(destination string) *LocalUploader {
+func NewLocalUploader(config *configs.YamlConfig) *LocalUploader {
 	return &LocalUploader{
-		destination,
+		BucketPath: config.BucketPath.Raw,
 	}
 }
 

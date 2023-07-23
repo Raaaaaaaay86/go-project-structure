@@ -7,7 +7,6 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/internal/repository"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
-	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 var _ validate.Validator = (*CreateVideoCommand)(nil)
@@ -57,10 +56,10 @@ type ICreateVideoUseCase interface {
 type CreateVideoUseCase struct {
 	VideoPostRepository repository.VideoPostRepository
 	UserRepository      repository.UserRepository
-	TracerProvider      *trace.TracerProvider
+	TracerProvider      tracing.ApplicationTracer
 }
 
-func NewCreateVideoUseCase(tracerProvider *trace.TracerProvider, videoPostRepository repository.VideoPostRepository, userRepository repository.UserRepository) *CreateVideoUseCase {
+func NewCreateVideoUseCase(tracerProvider tracing.ApplicationTracer, videoPostRepository repository.VideoPostRepository, userRepository repository.UserRepository) *CreateVideoUseCase {
 	return &CreateVideoUseCase{
 		VideoPostRepository: videoPostRepository,
 		UserRepository:      userRepository,

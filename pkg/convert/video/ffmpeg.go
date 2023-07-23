@@ -2,6 +2,7 @@ package convert
 
 import (
 	"fmt"
+	"github.com/raaaaaaaay86/go-project-structure/pkg/configs"
 	"os/exec"
 )
 
@@ -13,8 +14,10 @@ type Ffmpeg struct {
 	BucketPath string
 }
 
-func NewFfmpeg(bucketPath string) *Ffmpeg {
-	return &Ffmpeg{bucketPath}
+func NewFfmpeg(config *configs.YamlConfig) *Ffmpeg {
+	return &Ffmpeg{
+		BucketPath: config.BucketPath.Converted,
+	}
 }
 
 func (f Ffmpeg) Convert(targetPath string, outputFileName string) error {

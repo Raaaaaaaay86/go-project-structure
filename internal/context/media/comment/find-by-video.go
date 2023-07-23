@@ -7,7 +7,6 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/internal/repository"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/validate"
-	"go.opentelemetry.io/otel/sdk/trace"
 )
 
 var _ validate.Validator = (*FindByVideoQuery)(nil)
@@ -35,10 +34,10 @@ var _ IFindByVideoUseCase = (*FindByVideoUseCase)(nil)
 
 type FindByVideoUseCase struct {
 	VideoCommentRepository repository.VideoCommentRepository
-	TracerProvider         *trace.TracerProvider
+	TracerProvider         tracing.ApplicationTracer
 }
 
-func NewFindByVideoUseCase(tracerProvider *trace.TracerProvider, videoCommentRepository repository.VideoCommentRepository) *FindByVideoUseCase {
+func NewFindByVideoUseCase(tracerProvider tracing.ApplicationTracer, videoCommentRepository repository.VideoCommentRepository) *FindByVideoUseCase {
 	return &FindByVideoUseCase{
 		VideoCommentRepository: videoCommentRepository,
 		TracerProvider:         tracerProvider,
