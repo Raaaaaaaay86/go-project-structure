@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/raaaaaaaay86/go-project-structure/adapter/port_in/http"
-	"github.com/raaaaaaaay86/go-project-structure/adapter/port_in/http/route"
+	"github.com/raaaaaaaay86/go-project-structure/adapter/port_in/httplayer"
+	"github.com/raaaaaaaay86/go-project-structure/adapter/port_in/httplayer/route"
 	mongodb "github.com/raaaaaaaay86/go-project-structure/adapter/port_out/repository"
 	_ "github.com/raaaaaaaay86/go-project-structure/docs" //nolint:typecheck
 	"github.com/raaaaaaaay86/go-project-structure/internal/context/auth"
@@ -19,6 +19,11 @@ import (
 	"github.com/raaaaaaaay86/go-project-structure/pkg/mongo"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/tracing"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 func main() {
@@ -53,9 +58,9 @@ func Run(ctx context.Context) error {
 		zapLogger.Error("init application tracer failed.", err)
 	}
 
-	httpTracer, err := tracing.NewJaegerTracerProvider("http", exporter)
+	httpTracer, err := tracing.NewJaegerTracerProvider("httplayer", exporter)
 	if err != nil {
-		zapLogger.Error("init http tracer failed", err)
+		zapLogger.Error("init httplayer tracer failed", err)
 	}
 
 	repositoryTracer, err := tracing.NewJaegerTracerProvider("repository", exporter)
@@ -109,21 +114,34 @@ func Run(ctx context.Context) error {
 	videoController := route.NewVideoController(httpTracer, uploadVideoUseCase, createVideoUseCase, likeVideoUseCase, unlikeVideoUseCase)
 	commentController := route.NewCommentController(httpTracer, createCommentUseCase, findCommentByVideoUseCase, deleteCommentUseCase, forceDeleteCommentUseCase)
 
-	httpPort := fmt.Sprintf(":%d", config.Http.Port)
-	err = http.
-		NewHttpServer(authController, videoController, commentController).
-		Run(httpPort)
-	if err != nil {
-		neo4jDriver.Close(ctx)
-		mongoClient.Disconnect(ctx) //nolint:errcheck
+	// Start HTTP Server
+	port := fmt.Sprintf(":%d", config.Http.Port)
+	server := &http.Server{
+		Addr:    port,
+		Handler: httplayer.NewHttpServer(authController, videoController, commentController),
+	}
+	go func() {
+		if err = server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal(err)
+		}
+	}()
 
+	// HTTP Server Graceful Shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	exitCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	zapLogger.Warnw("server shutdown in 5 seconds", "event", "SERVER_SHUTDOWN")
+	if err := server.Shutdown(exitCtx); err != nil {
+		neo4jDriver.Close(exitCtx)
+		mongoClient.Disconnect(exitCtx) //nolint:errcheck
 		if db, err := gormDB.DB(); err != nil {
-			return err
+			log.Fatal(err)
 		} else {
 			db.Close()
 		}
-
-		return err
+		log.Fatal("Server Shutdown:", err)
 	}
 
 	return nil

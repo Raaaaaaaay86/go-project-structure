@@ -1,8 +1,8 @@
-package http
+package httplayer
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/raaaaaaaay86/go-project-structure/adapter/port_in/http/route"
+	"github.com/raaaaaaaay86/go-project-structure/adapter/port_in/httplayer/route"
 	"github.com/raaaaaaaay86/go-project-structure/pkg/middleware"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"

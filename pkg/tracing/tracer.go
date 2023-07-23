@@ -69,7 +69,7 @@ func HttpSpanFactory(tracerProvider *traceSdk.TracerProvider, ctx *gin.Context, 
 
 func RecordHttpError(span trace.Span, code int, err error) {
 	span.RecordError(err)
-	span.SetAttributes(attribute.Int("http.status_code", code))
+	span.SetAttributes(attribute.Int("httplayer.status_code", code))
 }
 
 func ApplicationSpanFactory(tracerProvider *traceSdk.TracerProvider, ctx context.Context, fullPackage string, method string) (context.Context, trace.Span) {
