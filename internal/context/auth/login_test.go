@@ -89,12 +89,18 @@ func TestLoginCQRS_Execute(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, expectedUser.Id, claim.Uid)
 
-		expectedRoleIds := make([]role.RoleId, 0)
-		for _, r := range expectedUser.Roles {
-			expectedRoleIds = append(expectedRoleIds, r.Id)
-		}
+		expectedRoleIds := extractRoleIds(t, expectedUser.Roles)
 		for _, r := range claim.Roles {
 			assert.Contains(t, expectedRoleIds, r)
 		}
 	}
+}
+
+func extractRoleIds(t *testing.T, roles []entity.Role) []role.RoleId {
+	t.Helper()
+	ids := make([]role.RoleId, len(roles))
+	for i, r := range roles {
+		ids[i] = r.Id
+	}
+	return ids
 }
