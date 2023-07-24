@@ -58,7 +58,7 @@ func Run(ctx context.Context) error {
 		zapLogger.Error("init application tracer failed.", err)
 	}
 
-	httpTracer, err := tracing.NewJaegerTracerProvider("httplayer", exporter)
+	httpTracer, err := tracing.NewJaegerTracerProvider("http", exporter)
 	if err != nil {
 		zapLogger.Error("init httplayer tracer failed", err)
 	}
@@ -66,6 +66,11 @@ func Run(ctx context.Context) error {
 	repositoryTracer, err := tracing.NewJaegerTracerProvider("repository", exporter)
 	if err != nil {
 		zapLogger.Error("init repository tracer failed", err)
+	}
+
+	gormTracer, err := tracing.NewJaegerTracerProvider("gorm", exporter)
+	if err != nil {
+		zapLogger.Error("init gorm tracer failed", err)
 	}
 
 	// Neo4j Driver
@@ -76,7 +81,7 @@ func Run(ctx context.Context) error {
 	defer neo4jDriver.Close(ctx)
 
 	// Postgres Repositories
-	gormDB, err := gorm.NewPostgresConnection(config.Postgres)
+	gormDB, err := gorm.NewPostgresConnection(config.Postgres, gormTracer)
 	if err != nil {
 		neo4jDriver.Close(ctx)
 		return err
