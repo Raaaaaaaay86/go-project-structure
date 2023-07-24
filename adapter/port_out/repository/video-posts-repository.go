@@ -81,7 +81,7 @@ func (v VideoPostRepository) Update(ctx context.Context, post *entity.VideoPost)
 	newCtx, span := tracing.RepositorySpanFactory(v.TracerProvider, ctx, pkg, "VideoPostRepository.Update")
 	defer span.End()
 
-	err := v.DB.Transaction(func(tx *gorm.DB) error {
+	err := v.DB.WithContext(newCtx).Transaction(func(tx *gorm.DB) error {
 		video, err := v.FindById(newCtx, post.Id)
 		if err != nil {
 			return err
@@ -103,10 +103,10 @@ func (v VideoPostRepository) Update(ctx context.Context, post *entity.VideoPost)
 }
 
 func (v VideoPostRepository) Create(ctx context.Context, post *entity.VideoPost) error {
-	_, span := tracing.RepositorySpanFactory(v.TracerProvider, ctx, pkg, "VideoPostRepository.Create")
+	newCtx, span := tracing.RepositorySpanFactory(v.TracerProvider, ctx, pkg, "VideoPostRepository.Create")
 	defer span.End()
 
-	tx := v.DB.Create(post)
+	tx := v.DB.WithContext(newCtx).Create(post)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -115,11 +115,11 @@ func (v VideoPostRepository) Create(ctx context.Context, post *entity.VideoPost)
 }
 
 func (v VideoPostRepository) FindById(ctx context.Context, id uint) (*entity.VideoPost, error) {
-	_, span := tracing.RepositorySpanFactory(v.TracerProvider, ctx, pkg, "VideoPostRepository.FindById")
+	newCtx, span := tracing.RepositorySpanFactory(v.TracerProvider, ctx, pkg, "VideoPostRepository.FindById")
 	defer span.End()
 
 	var post entity.VideoPost
-	tx := v.DB.Where("id = ?", id).First(&post)
+	tx := v.DB.WithContext(newCtx).Where("id = ?", id).First(&post)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}

@@ -52,7 +52,11 @@ func App() (*Application, error) {
 	if err != nil {
 		return nil, err
 	}
-	db, err := gorm.NewPostgresConnection(yamlConfig)
+	gormTracer, err := tracing.NewGormTracer(exporter)
+	if err != nil {
+		return nil, err
+	}
+	db, err := gorm.NewPostgresConnection(yamlConfig, gormTracer)
 	if err != nil {
 		return nil, err
 	}

@@ -35,11 +35,11 @@ func (u UserRepository) Create(ctx context.Context, user *entity.User) error {
 }
 
 func (u UserRepository) FindById(ctx context.Context, id uint) (*entity.User, error) {
-	_, span := tracing.RepositorySpanFactory(u.TracerProvider, ctx, pkg, "UserRepository.FindById")
+	newCtx, span := tracing.RepositorySpanFactory(u.TracerProvider, ctx, pkg, "UserRepository.FindById")
 	defer span.End()
 
 	var user entity.User
-	tx := u.DB.Where("id = ?", id).First(&user)
+	tx := u.DB.WithContext(newCtx).Where("id = ?", id).First(&user)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -48,11 +48,11 @@ func (u UserRepository) FindById(ctx context.Context, id uint) (*entity.User, er
 }
 
 func (u UserRepository) FindByUsername(ctx context.Context, username string) (*entity.User, error) {
-	_, span := tracing.RepositorySpanFactory(u.TracerProvider, ctx, pkg, "UserRepository.FindByUsername")
+	newCtx, span := tracing.RepositorySpanFactory(u.TracerProvider, ctx, pkg, "UserRepository.FindByUsername")
 	defer span.End()
 
 	var user entity.User
-	tx := u.DB.Where("username = ?", username).First(&user)
+	tx := u.DB.WithContext(newCtx).Where("username = ?", username).First(&user)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}

@@ -24,6 +24,7 @@ func NewVideoCommentRepository(tracerProvider tracing.RepositoryTracer, client *
 		TracerProvider: tracerProvider,
 	}
 }
+
 func (v VideoCommentRepository) comments() *mongo.Collection {
 	return v.Client.Database("video").Collection("comments")
 }

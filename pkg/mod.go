@@ -20,6 +20,7 @@ var PkgSet = wire.NewSet(
 	tracing.NewApplicationTracer,
 	tracing.NewRepositoryTracer,
 	tracing.NewHttpTracer,
+	tracing.NewGormTracer,
 	logger.NewZapLogger,
 	graphdb.NewNeo4j,
 	gorm.NewPostgresConnection,

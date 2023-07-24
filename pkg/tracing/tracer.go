@@ -82,6 +82,17 @@ func NewHttpTracer(exporter *jaeger.Exporter) (HttpTracer, error) {
 	return NewJaegerTracerProvider("http", exporter)
 }
 
+type GormTracer trace.TracerProvider
+
+func NewGormTracer(exporter *jaeger.Exporter) (GormTracer, error) {
+	provider, err := NewJaegerTracerProvider("gorm", exporter)
+	if err != nil {
+		return nil, err
+	}
+
+	return provider, nil
+}
+
 func HttpSpanFactory(tracerProvider trace.TracerProvider, ctx *gin.Context, fullPackage string) (context.Context, trace.Span) {
 	return tracerProvider.Tracer(fullPackage).Start(ctx, fmt.Sprintf("%s %s", ctx.Request.Method, ctx.Request.URL.Path))
 }
